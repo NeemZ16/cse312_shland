@@ -1,10 +1,10 @@
-from flask import Flask, request, render_template, redirect, url_for, make_response, send_file, abort
+from flask import Flask, request, render_template, make_response, abort
 
 
 app = Flask(__name__, template_folder='public/templates')
 app.config['ENV'] = 'development'
 
-allowed_images = ["eagle.jpg", "flamingo.jpg"]
+allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg"]
 
 
 def return_image(path):
