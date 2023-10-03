@@ -20,15 +20,12 @@ def return_image(path):
 @app.route('/index.html', methods=['GET'])
 
 def index():
-    # print("Method:")
-    # print(request.method)
-    # print("Headers: ")
-    # print(request.headers)
+
 
     response = make_response(render_template('index.html'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
-    response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
+    # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
 
     return response
 
@@ -39,7 +36,7 @@ def style():
     response = make_response(render_template('style.css'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/css; charset=utf-8"
-    response.headers["Content-Length"] = str(len(open("public/templates/style.css").read()))
+    # response.headers["Content-Length"] = str(len(open("public/templates/style.css").read()))
 
     return response
 
@@ -50,7 +47,7 @@ def javascript():
     response = make_response(render_template('functions.js'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/javascript; charset=utf-8"
-    response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
+    # response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
 
     return response
 
@@ -65,42 +62,10 @@ def send_image(image):
     response = make_response(image_bytes)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "image/jpeg"
-    image_length = str(len((open(f"public/static/{image}", "rb").read())))
-    response.headers["Content-Length"] = image_length
+    # image_length = str(len((open(f"public/static/{image}", "rb").read())))
+    # response.headers["Content-Length"] = image_length
 
     return response
-
-
-# @app.route('/static/eagle.jpg', methods=['GET'])
-#
-# def send_eagle():
-#     image_bytes = open("public/static/eagle.jpg", "rb").read()
-#     response = make_response(image_bytes)
-#     response.headers["X-Content-Type-Options"] = "nosniff"
-#     response.headers["Content-Type"] = "image/jpeg"
-#     # response.headers["Content-Length"] = str(len((open("static/eagle.jpg", "rb").read())))
-#     image_length = str(len((open("public/static/eagle.jpg", "rb").read())))
-#     # print(response.headers["Content-Length"])
-#     response.headers["Content-Length"] = image_length
-#     # print(response.headers["Content-Length"])
-#
-#     return response
-#
-# @app.route('/static/flamingo.jpg', methods=['GET'])
-#
-# def send_flamingo():
-#     image_bytes = open("public/static/flamingo.jpg", "rb").read()
-#     response = make_response(image_bytes)
-#     response.headers["X-Content-Type-Options"] = "nosniff"
-#     response.headers["Content-Type"] = "image/jpeg"
-#     image_length = str(len((open("public/static/flamingo.jpg", "rb").read())))
-#     # print(response.headers["Content-Length"])
-#     response.headers["Content-Length"] = image_length
-#     # print(response.headers["Content-Length"])
-#
-#     # response.headers["Content-Length"] = str(len((open("static/flamingo.jpg", "rb").read())))
-#
-#     return response
 
 @app.route('/visit-counter', methods=['GET'])
 def send_cookie():
