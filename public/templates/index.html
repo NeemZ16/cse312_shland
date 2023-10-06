@@ -1,23 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>This is my Flask site</title>
+    <title>This is our Flask site</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <link rel="icon" type="image/x-icon" href="../static/flamingo.jpg">
 </head>
-<body onload="welcome();">
 
-<h1>My Flask webpage</h1>
+<body class = stretchedToMargin onload="welcome();">
+
+<div class="title">
+    <h1>Our Flask webpage</h1>
+</div>
+
 
 <p id="paragraph">
     This text is from the HTML file 🙂 🥸 🤩 😒 😞
 </p>
 
-<img src="../static/apple.jpg" alt="It's an apple" class="my_image"/>
-
+<!--<img src="../static/apple.jpg" alt="It's an apple" class="my_image"/>-->
 
 <br/>
 <hr/>
+
+<div class="header">
+    <div>
+        <img src="../static/flamingo.jpg" alt="It's an eagle" class="my_image"/></div>
+    <div>
+        <p id="paragraph">
+            &nbsp;Welcome to the Shland chat 😎. Only cool people allowed &nbsp;
+        </p>
+    </div>
+    <div>
+        <img src="../static/flamingo.jpg" alt="It's an eagle" class="my_image"/>
+    </div>
+</div>
+
+<div class="contents">
+    <div class="chat">
+        <div id="chat-messages">
+        </div>
+
+        <div class="chat-form">
+            <hr>
+            <label>
+                Chat:
+                <input id="chat-text-box" type="text">
+            </label>
+            <button id="chat-button" onclick="sendChat()">Send</button>
+        </div>
+
+    </div>
+    <div class="user-list">
+
+
+        Register:
+        <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="reg-form-username" type="text" name="username_reg"/>
+            </label>
+            <br/>
+            <label>Password:&nbsp;
+                <input id="reg-form-pass" type="password" name="password_reg">
+            </label>
+            <input type="submit" value="Post">
+        </form>
+
+        Login:
+        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="login-form-username" type="text" name="username_login"/>
+            </label>
+            <br/>
+            <label>Password:&nbsp;
+                <input id="login-form-pass" type="password" name="password_login">
+            </label>
+            <input type="submit" value="Post">
+        </form>
+
+
+    </div>
+</div>
 
 
 <script src="functions.js"></script>

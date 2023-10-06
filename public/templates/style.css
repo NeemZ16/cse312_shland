@@ -1,13 +1,81 @@
 
 body {
-    background-color: #0c1882;
+    background-color: #133333;
     color: white;
 }
 
 .my_image {
-    width: 220px;
+    width: 200px;
 }
+
 p {
-    font-size: 20px;
+    font-size: 18px;
     font-style: italic;
+}
+
+img.post {
+    width: 120px;
+}
+
+.title{
+    height: 5%;
+}
+
+.header{
+    display: flex;
+    background-color: #F6F1F1;
+    color: black;
+    height: 29%;
+    align-items: center;
+    justify-content: center;
+}
+
+.contents{
+    display: flex;
+    justify-content: space-around;
+    height: 50%
+}
+
+.chat{
+    /*height:100%;*/
+    width: 70%;
+    background-color: #e95d28;
+    padding: 20px;
+    /*overflow: scroll;*/
+}
+
+#chat-messages{
+    height: 90%;
+    /*width: 70%;*/
+    /*background-color: aqua;*/
+    /*padding: 20px;*/
+    overflow: scroll;
+}
+
+.chat-form{
+    /*width: 70%;*/
+    /*background-color: aqua;*/
+    /*padding: 20px;*/
+    /*overflow: scroll;*/
+    height: 30px;
+}
+
+
+.user-list{
+    width: 30%;
+    background-color: #BAB86C;
+    padding: 20px;
+}
+.header > div{
+    padding: 20px 0;
+}
+
+.stretchedToMargin {
+  display: block;
+  position:absolute;
+  height:auto;
+  bottom:0;
+  top:0;
+  left:0;
+  right:0;
 }
