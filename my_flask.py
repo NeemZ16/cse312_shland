@@ -1,11 +1,18 @@
-from flask import Flask, request, render_template, make_response, abort
-
+from flask import Flask, request, render_template, make_response, abort, redirect
+from pymongo import MongoClient
+import json
+import bcrypt
+import secrets
+import hashlib
 
 app = Flask(__name__, template_folder='public/templates')
 app.config['ENV'] = 'development'
 
 allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg"]
 
+mongo_client = MongoClient("mongo")
+db = mongo_client["cse312"]
+user_collection = db["users"]
 
 def return_image(path):
     path_as_array = path.split("/")
@@ -19,9 +26,8 @@ def return_image(path):
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
 
+
 def index():
-
-
     response = make_response(render_template('index.html'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
@@ -129,8 +135,55 @@ def send_cookie():
 
 
 
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form.get("username_reg")
+    password = request.form.get("password_reg")
+   
+    if username and password:
+        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        user_collection.insert_one({"username": username, "password": hashed})
+
+    return redirect('/', code = 301)
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get("username_login")
+    password = request.form.get("password_login")
+
+    #need to debug this
+    if "Cookie" in request.headers:
+        cookies = request.headers["Cookie"]
+        listofc = cookies.split(";")
+        listofitems =  listofc.split("=")
+        if "auth_token" in listofitems:
+            indexofkey = listofitems.index("auth_token")
+            token = listofitems[indexofkey+1]
+            hashed_token =  bcrypt.hashpw(token.encode("utf-8"))
+            user = user_collection.find_one({"auth_token": hashed_token})
+            if user:
+                return redirect(f"/?name={user}", code=302)
+
+
+    if username and password:
+        db_pass = user_collection.find_one({"username": username})
+
+        if db_pass:
+            hash_pass = db_pass["password"]
+            if bcrypt.checkpw(password.encode("utf-8"), hash_pass):
+                auth_token = secrets.token_urlsafe(32)
+                hashed_token = hashlib.sha256(auth_token.encode("utf-8")).hexdigest()
+                user_collection.update_one({"username": username}, {"$set": {"auth_token": hashed_token}})
+                response = redirect(f"/?name={username}", code=302)
+                token_cookie = str(auth_token) + '; Max-Age=3600; Path=/'
+                response.headers["Set-Cookie"] = token_cookie
+
+                return response
+
+        return "HTTP/1.1 401 Unauthorized\r\n\r\nIncorrect username or password", 401
+
 
 
 if __name__ == "__main__":
      # Please do not set debug=True in production
-     app.run(host="0.0.0.0", port=8080, debug=True)
+     app.run(host="0.0.0.0", port=27017, debug=True)

@@ -14,7 +14,11 @@
 
 
 <p id="paragraph">
-    This text is from the HTML file 🙂 🥸 🤩 😒 😞
+    {% if request.args.get('name') %}
+        Welcome {{ request.args.get('name') }}!
+    {% else %}
+        Welcome, Guest!
+    {% endif %}
 </p>
 
 <!--<img src="../static/apple.jpg" alt="It's an apple" class="my_image"/>-->
@@ -51,7 +55,6 @@
 
     </div>
     <div class="user-list">
-
 
         Register:
         <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
