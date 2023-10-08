@@ -1,7 +1,4 @@
 
-function welcome() {
-    document.getElementById("paragraph").innerHTML += "<br/>JavaScript text is so 😀 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯"
-}
 function deleteMessage(messageId) {
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
@@ -66,6 +63,9 @@ function updateChat() {
 }
 
 function welcome() {
+    document.getElementById("paragraph").innerHTML += "<br/>JavaScript text is so 😀 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯"
+
+
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
             sendChat();
@@ -76,5 +76,6 @@ function welcome() {
     document.getElementById("chat-text-box").focus();
 
     updateChat();
-    setInterval(updateChat, 20000);
+    //Uncomment below for chat implementation
+    //setInterval(updateChat, 80000);
 }

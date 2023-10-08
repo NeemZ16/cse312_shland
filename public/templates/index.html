@@ -14,11 +14,7 @@
 
 
 <p id="paragraph">
-    {% if request.args.get('name') %}
-        Welcome {{ request.args.get('name') }}!
-    {% else %}
-        Welcome, Guest!
-    {% endif %}
+    Welcome {{ name }} !
 </p>
 
 <!--<img src="../static/apple.jpg" alt="It's an apple" class="my_image"/>-->
