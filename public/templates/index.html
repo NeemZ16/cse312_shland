@@ -76,8 +76,30 @@
             <input type="submit" value="Post">
         </form>
 
-
+        Create Post:
+        <form action="/create-post" method="post">
+            <label for="post-title">Title:</label>
+            <input id="post-title" type="text" name="title" required>
+            <br>
+            <label for="post-description">Description:</label>
+            <textarea id="post-description" name="description" required></textarea>
+            <br>
+            <input type="submit" value="Create Post">
+        </form>
     </div>
+    <div class="posts">
+        <h2>Posts:</h2>
+        <ul> <!-- unordered list -->
+            {% for post in posts %}  <!-- { % are for conditional statements -->
+            <li>
+                <!-- strong is for boldness? basically emphasis on a word, hence strong -->
+                <strong>{{ post.username }}</strong>: {{ post.title }}<br>
+                {{ post.description }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
 </div>
 
 

@@ -20,8 +20,8 @@ def escape_html(message):
 
     return escaped_message
 
-mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
 user_collection = db["users"]
 
@@ -37,7 +37,6 @@ def return_image(path):
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
 def index():
-
     if request.headers.get("Cookie") is not None:
         print("cookies exist", file=sys.stderr)
         if "auth_token" in request.headers.get("Cookie"):
@@ -61,7 +60,9 @@ def index():
         print("user is guest", file=sys.stderr)
         username = "Guest"
 
-    response = make_response(render_template('index.html', name=username))
+    posts = db.posts.find()
+
+    response = make_response(render_template('index.html', name=username, posts=posts))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
@@ -246,10 +247,29 @@ def login():
         abort(406, 'missing username or password')
 
 
+@app.route('/create-post', methods=['POST'])
+def create_post():
+    if "auth_token" not in request.headers.get("Cookie"):
+        abort(401, "Only authenticated users can create posts")
 
+    hashedToken = hashlib.sha256(request.headers.get("Cookie")["auth_token"].encode("utf-8")).hexdigest()
+    user = user_collection.find_one({"auth_token": hashedToken})
 
+    if user:
+        username = user['username']
+    else:
+        abort(401, "User authentication failed")
 
+    title = escape_html(request.form.get('title'))
+    description = escape_html(request.form.get("description"))
+
+    post = {
+        'title': title,
+        'description': description,
+        'username': username
+    }
+    db.posts.insert_one(post)
 
 if __name__ == "__main__":
     # Please do not set debug=True in production
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080)#, debug=True)
