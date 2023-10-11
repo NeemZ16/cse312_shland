@@ -20,8 +20,8 @@ def escape_html(message):
 
     return escaped_message
 
-# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
 user_collection = db["users"]
 
@@ -54,8 +54,12 @@ def index():
 
             user = user_collection.find_one({"auth_token": hashed_token})
 
-        if user:
-            username = user["username"]
+            if user:
+                username = user["username"]
+            else:
+                username = "Guest"
+        else:
+            username = "Guest"
     else:
         print("user is guest", file=sys.stderr)
         username = "Guest"
@@ -272,4 +276,4 @@ def create_post():
 
 if __name__ == "__main__":
     # Please do not set debug=True in production
-    app.run(host="0.0.0.0", port=8080)#, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)

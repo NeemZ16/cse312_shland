@@ -90,13 +90,15 @@
     <div class="posts">
         <h2>Posts:</h2>
         <ul> <!-- unordered list -->
-            {% for post in posts %}  <!-- { % are for conditional statements -->
+
+            {% for post in posts %} <!-- { % are for conditional statements -->
             <li>
                 <!-- strong is for boldness? basically emphasis on a word, hence strong -->
                 <strong>{{ post.username }}</strong>: {{ post.title }}<br>
                 {{ post.description }}
             </li>
             {% endfor %}
+
         </ul>
     </div>
 
