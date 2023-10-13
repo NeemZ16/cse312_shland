@@ -1,67 +1,3 @@
-
-function deleteMessage(messageId) {
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            console.log(this.response);
-        }
-    }
-    request.open("DELETE", "/chat-message/" + messageId);
-    request.send();
-}
-
-function chatMessageHTML(messageJSON) {
-    const username = messageJSON.username;
-    const message = messageJSON.message;
-    const messageId = messageJSON.id;
-    let messageHTML = "<br><button onclick='deleteMessage(\"" + messageId + "\")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
-    return messageHTML;
-}
-
-function clearChat() {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML = "";
-}
-
-function addMessageToChat(messageJSON) {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML += chatMessageHTML(messageJSON);
-    chatMessages.scrollIntoView(false);
-    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
-}
-
-function sendChat() {
-    const chatTextBox = document.getElementById("chat-text-box");
-    const message = chatTextBox.value;
-    chatTextBox.value = "";
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            console.log(this.response);
-        }
-    }
-    const messageJSON = {"message": message};
-    request.open("POST", "/chat-message");
-    request.send(JSON.stringify(messageJSON));
-    chatTextBox.focus();
-}
-
-function updateChat() {
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            clearChat();
-            const messages = JSON.parse(this.response);
-            for (const message of messages) {
-                addMessageToChat(message);
-            }
-        }
-    }
-    request.open("GET", "/chat-history");
-    request.send();
-}
-
 function welcome() {
     document.getElementById("paragraph").innerHTML += "<br/>JavaScript text is so 😀 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯"
 
@@ -73,9 +9,35 @@ function welcome() {
     });
 
     document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀";
-    document.getElementById("chat-text-box").focus();
 
-    updateChat();
-    //Uncomment below for chat implementation
-    //setInterval(updateChat, 80000);
+    updatePosts();
+    console.log("yes");
+    setInterval(updatePosts, 2000);
+}
+function updatePosts() {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            clearPosts();
+            const posts = JSON.parse(this.response);
+            console.log(posts)
+            for (const post of posts) {
+                addPost(post);
+            }
+        }
+    };
+    request.open("GET", "/get-posts");
+    request.send();
+}
+
+function clearPosts() {
+    const postList = document.getElementById('post-list');
+    postList.innerHTML = '';
+}
+
+function addPost(post) {
+    const postList = document.getElementById('post-list');
+    const postItem = document.createElement('li');
+    postItem.innerText = `${post.username}: ${post.title} - ${post.description}`;
+    postList.appendChild(postItem);
 }

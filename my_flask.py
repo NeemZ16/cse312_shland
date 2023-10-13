@@ -5,6 +5,7 @@ import bcrypt
 import secrets
 import hashlib
 import sys
+from bson import ObjectId
 
 app = Flask(__name__, template_folder='public/templates')
 app.config['ENV'] = 'development'
@@ -253,12 +254,27 @@ def login():
 
 @app.route('/create-post', methods=['POST'])
 def create_post():
-    if "auth_token" not in request.headers.get("Cookie"):
+    authCookie = request.headers.get("Cookie")
+    if not authCookie or "auth_token" not in authCookie:
         abort(401, "Only authenticated users can create posts")
 
-    hashedToken = hashlib.sha256(request.headers.get("Cookie")["auth_token"].encode("utf-8")).hexdigest()
+    authToken = None
+    cookies = {}
+    if authCookie:
+        pairs = authCookie.split(';')
+        for cookie in pairs:
+            key, value = cookie.strip().split("=", 1)
+            cookies[key] = value
+
+    if "auth_token" in cookies:
+        authToken = cookies["auth_token"]
+    else:
+        abort(401, "User authentication failed")
+
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
     user = user_collection.find_one({"auth_token": hashedToken})
 
+    #since grabbing username from DB, is it enough to get away with security check?
     if user:
         username = user['username']
     else:
@@ -270,9 +286,17 @@ def create_post():
     post = {
         'title': title,
         'description': description,
-        'username': username
+        'username': username,
     }
     db.posts.insert_one(post)
+    return redirect('http://localhost:8080', code=301)
+
+@app.route('/get-posts', methods=['GET'])
+def get_posts():
+    posts = list(db.posts.find())
+    for post in posts:
+        post['_id'] = str(post['_id'])
+    return json.dumps(posts), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
 
 if __name__ == "__main__":
     # Please do not set debug=True in production

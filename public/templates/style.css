@@ -36,32 +36,7 @@ img.post {
     height: 50%
 }
 
-.chat{
-    /*height:100%;*/
-    width: 70%;
-    background-color: #e95d28;
-    padding: 20px;
-    /*overflow: scroll;*/
-}
-
-#chat-messages{
-    height: 90%;
-    /*width: 70%;*/
-    /*background-color: aqua;*/
-    /*padding: 20px;*/
-    overflow: scroll;
-}
-
-.chat-form{
-    /*width: 70%;*/
-    /*background-color: aqua;*/
-    /*padding: 20px;*/
-    /*overflow: scroll;*/
-    height: 30px;
-}
-
-
-.user-list{
+.user-list, .posts{
     width: 30%;
     background-color: #BAB86C;
     padding: 20px;

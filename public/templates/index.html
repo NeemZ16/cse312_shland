@@ -36,22 +36,7 @@
 </div>
 
 <div class="contents">
-    <div class="chat">
-        <div id="chat-messages">
-        </div>
-
-        <div class="chat-form">
-            <hr>
-            <label>
-                Chat:
-                <input id="chat-text-box" type="text">
-            </label>
-            <button id="chat-button" onclick="sendChat()">Send</button>
-        </div>
-
-    </div>
     <div class="user-list">
-
         Register:
         <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
             <label>Username:
@@ -63,7 +48,7 @@
             </label>
             <input type="submit" value="Post">
         </form>
-
+        <br/>
         Login:
         <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
             <label>Username:
@@ -75,7 +60,7 @@
             </label>
             <input type="submit" value="Post">
         </form>
-
+        <br/>
         Create Post:
         <form action="/create-post" method="post">
             <label for="post-title">Title:</label>
@@ -86,25 +71,13 @@
             <br>
             <input type="submit" value="Create Post">
         </form>
+        <br/>
     </div>
     <div class="posts">
         <h2>Posts:</h2>
-        <ul> <!-- unordered list -->
-
-            {% for post in posts %} <!-- { % are for conditional statements -->
-            <li>
-                <!-- strong is for boldness? basically emphasis on a word, hence strong -->
-                <strong>{{ post.username }}</strong>: {{ post.title }}<br>
-                {{ post.description }}
-            </li>
-            {% endfor %}
-
-        </ul>
+        <ul id="post-list"> <!-- unordered list --></ul>
     </div>
-
 </div>
-
-
 <script src="functions.js"></script>
 </body>
 </html>
