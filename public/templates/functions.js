@@ -38,6 +38,14 @@ function clearPosts() {
 function addPost(post) {
     const postList = document.getElementById('post-list');
     const postItem = document.createElement('li');
+    var postID = post.id // record post id
+
+    var likeButton = document.createElement('input'); // create like button
+    likeButton.type = 'checkbox';
+    likeButton.id = postID;
+    likeButton.checked = False;
+    postItem.appendChild(likeButton) // append cb to li
+
     postItem.innerText = `${post.username}: ${post.title} - ${post.description}`;
     postList.appendChild(postItem);
 }

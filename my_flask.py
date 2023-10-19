@@ -21,18 +21,13 @@ def escape_html(message):
 
     return escaped_message
 
-mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
 user_collection = db["users"]
 
-def return_image(path):
-    path_as_array = path.split("/")
-    if (path_as_array[-1] in allowed_images):
-        print("valid image request")
-        return 0
-    return 1
-
+print('hello')
+print(db.list_collection_names)
 
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
@@ -284,11 +279,20 @@ def create_post():
     description = escape_html(request.form.get("description"))
 
     post = {
+        # 'id': 0,
         'title': title,
         'description': description,
-        'username': username,
+        'username': username, # may change to 'poster'
+        'like-count': 0, # added like count
+        'likers': [] # list of objects i.e., {'name': True/False}
     }
+
+
     db.posts.insert_one(post)
+    # # get id
+    # metrics = db.find(post)
+    # db.likers_of_post.insert_one(likers_of_post)
+
     return redirect('http://localhost:8080', code=301)
 
 @app.route('/get-posts', methods=['GET'])
@@ -297,6 +301,15 @@ def get_posts():
     for post in posts:
         post['_id'] = str(post['_id'])
     return json.dumps(posts), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
+
+# @app.route('/like-post', method=['POST'])
+# def like_post():
+#     pass
+
+# @app.route('/get_likes', method=['GET'])
+# def get_likes():
+#     pass
+
 
 if __name__ == "__main__":
     # Please do not set debug=True in production
