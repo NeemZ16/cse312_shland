@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, render_template, make_response, abort, redirect
+from flask import Flask, request, Response, current_app, render_template, make_response, abort, redirect
 from pymongo import MongoClient
 import json
 import bcrypt
@@ -7,11 +7,31 @@ import hashlib
 import sys
 from bson import ObjectId
 
-app = Flask(__name__, template_folder='public/templates')
-app.config['ENV'] = 'development'
+'''
+Resources:
+https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%20automatically%20creates%20a%20static,.0.1%3A5000%2Flogo.
+
+'''
+
+# DB AND ALLOWED IMAGE SET UP -----------------------------------------
+# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+db = mongo_client["cse312"]
+# db.create_collection('users')
+# db.create_collection('posts')
+user_collection = db["users"]
+post_collection = db["posts"]
+
+print('hello, printing mongo colletcions (local testing)')
+print(db.list_collection_names())
+
 allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg"]
 
+# create instance of the class
+# __name__ is convenient shortcut to pass application's module/package
+app = Flask(__name__, template_folder='public/templates')
 
+# HELPER FUNCS --------------------------------------------------------
 def escape_html(message):
     escaped_message = message.replace("&", "&amp;")
     escaped_message = escaped_message.replace(">", "&gt;")
@@ -21,14 +41,9 @@ def escape_html(message):
 
     return escaped_message
 
-# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
-db = mongo_client["cse312"]
-user_collection = db["users"]
 
-print('hello')
-print(db.list_collection_names)
-
+# PATHS (TEMPLATE/IMAGE RENDERING) ------------------------------------
+# route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
@@ -91,10 +106,9 @@ def javascript():
 
     return response
 
-
 @app.route('/static/<image>', methods=['GET'])
 def send_image(image):
-    if (return_image(f"/static/{image}") == 1):
+    if (image not in allowed_images):
         abort(404)
 
     image_bytes = open(f"public/static/{image}", "rb").read()
@@ -289,9 +303,12 @@ def create_post():
 
 
     db.posts.insert_one(post)
-    # # get id
-    # metrics = db.find(post)
-    # db.likers_of_post.insert_one(likers_of_post)
+
+    # get id (i dont think we need this rn)
+    cursor = db.posts.find(post)
+    objectID = cursor['_id']
+    print(str(objectID))
+    
 
     return redirect('http://localhost:8080', code=301)
 
@@ -302,9 +319,11 @@ def get_posts():
         post['_id'] = str(post['_id'])
     return json.dumps(posts), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
 
-# @app.route('/like-post', method=['POST'])
-# def like_post():
-#     pass
+@app.route('/like-post', methods=['POST'])
+def like_post():
+    # authenticate user
+    # update the post's like in db
+    return redirect('http://localhost:8080', code=301)
 
 # @app.route('/get_likes', method=['GET'])
 # def get_likes():
