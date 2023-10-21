@@ -322,9 +322,43 @@ def get_posts():
 @app.route('/like-post', methods=['POST'])
 def like_post():
     # authenticate user
-    # update the post's like in db
+    authCookie = request.headers.get("Cookie")
+    if not authCookie or "auth_token" not in authCookie:
+        abort(401, "Only authenticated users can like posts")
+
+    authToken = None
+    cookies = {}
+    if authCookie:
+        pairs = authCookie.split(';')
+        for cookie in pairs:
+            key, value = cookie.strip().split("=", 1)
+            cookies[key] = value
+
+    if "auth_token" in cookies:
+        authToken = cookies["auth_token"]
+    else:
+        abort(401, "User authentication failed")
+
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user = user_collection.find_one({"auth_token": hashedToken})
+
+    if user:
+        username = user['username']
+        # update the post's like in db
+        # get post by post id (how do we get post id?)
+        # if user in likers of post
+        #   decrement like count
+        #   remove username from likers
+        # else
+        #   increment like count
+        #   add username to likers
+        # db.posts.update_one with the new like count and likers
+    else:
+        abort(401, "User authentication failed")
+
     return redirect('http://localhost:8080', code=301)
 
+# what's this method for?
 # @app.route('/get_likes', method=['GET'])
 # def get_likes():
 #     pass
