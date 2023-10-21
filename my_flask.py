@@ -350,7 +350,7 @@ def like_post():
         # else increment like count and add username to likers
         if post:
             print("post found", file=sys.stderr)    # debugging
-            count = post['like-count']
+            count = post['likecount']
             likers = post['likers']
             if username in likers:
                 count -= 1

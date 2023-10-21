@@ -49,7 +49,7 @@ function addPost(post) {
     likeButton.name = 'like-button';
     likeButton.value = postID;
     // likeButton.onclick = likePost(likeButton);
-    likeButton.setAttribute('onClick', likePost(likeButton));
+    likeButton.addEventListener("click", function () {likePost(likeButton)});
     postList.appendChild(likeButton) // append cb to li
 }
 
@@ -60,13 +60,6 @@ function likePost(likeButton) {
     const postID = likeButton.value;
     const body = JSON.stringify({'_id': postID}); // is this enough? we valid them in the python file
 
-    request.onload = () => {
-      if (request.readyState == 4 && request.status == 200) { // neem: changed 201 to 200
-        console.log('trying to like post: ');
-      } else {
-        console.log(`Error: ${request.status}`);
-      }
-    };
 
     request.send(body);
 }
