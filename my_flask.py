@@ -14,8 +14,8 @@ https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%2
 '''
 
 # DB AND ALLOWED IMAGE SET UP -----------------------------------------
-# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
 # db.create_collection('users')
 # db.create_collection('posts')
@@ -293,7 +293,6 @@ def create_post():
     description = escape_html(request.form.get("description"))
 
     post = {
-        # 'id': 0,
         'title': title,
         'description': description,
         'username': username, # may change to 'poster'
@@ -305,9 +304,9 @@ def create_post():
     db.posts.insert_one(post)
 
     # get id (i dont think we need this rn)
-    cursor = db.posts.find(post)
-    objectID = cursor['_id']
-    print(str(objectID))
+    # cursor = db.posts.find(post)
+    # objectID = cursor['_id']
+    # print(str(objectID))
     
 
     return redirect('http://localhost:8080', code=301)
@@ -345,13 +344,15 @@ def like_post():
     if user:
         username = user['username']
         # update the post's like in db
-        # get post by post id (how do we get post id?)
-        # if user in likers of post
-        #   decrement like count
-        #   remove username from likers
-        # else
-        #   increment like count
-        #   add username to likers
+        # get post id (from request body) and db.posts.find_one({"_id": postID})
+        body = request.get_json(force=True)         # should get json from payload
+        postID = body["_id"]
+        post = db.posts.find_one({"_id": postID})
+
+        # if user in likers of post: decrement like count and remove username from likers
+        # else increment like count and add username to likers
+
+
         # db.posts.update_one with the new like count and likers
     else:
         abort(401, "User authentication failed")
