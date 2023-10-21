@@ -48,7 +48,8 @@ function addPost(post) {
     // likeButton.type = 'button'; // may not be necessary
     likeButton.name = 'like-button';
     likeButton.value = postID;
-    likeButton.onclick = likePost(likeButton);
+    // likeButton.onclick = likePost(likeButton);
+    likeButton.setAttribute('onClick', likePost(likeButton));
     postList.appendChild(likeButton) // append cb to li
 }
 
@@ -61,7 +62,7 @@ function likePost(likeButton) {
 
     request.onload = () => {
       if (request.readyState == 4 && request.status == 200) { // neem: changed 201 to 200
-        console.log(JSON.parse(request.responseText));
+        console.log('trying to like post: ');
       } else {
         console.log(`Error: ${request.status}`);
       }

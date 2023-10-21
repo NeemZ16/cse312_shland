@@ -320,6 +320,7 @@ def like_post():
     # authenticate user
     authCookie = request.headers.get("Cookie")
     if not authCookie or "auth_token" not in authCookie:
+        print('hello')
         abort(401, "Only authenticated users can like posts")
 
     authToken = None
@@ -349,7 +350,7 @@ def like_post():
         # else increment like count and add username to likers
         if post:
             print("post found", file=sys.stderr)    # debugging
-            count = post['likecount']
+            count = post['like-count']
             likers = post['likers']
             if username in likers:
                 count -= 1
