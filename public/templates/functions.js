@@ -41,10 +41,10 @@ function addPost(post) {
     postItem.innerText = `${post.username}: ${post.title} - ${post.description}`;
     postList.appendChild(postItem);
 
-    var postID = post.id // record post id
+    var postID = post._id // record post id
     var likeCount = post.likeCount;
     var likeButton = document.createElement('button'); // create like button
-    likeButton.innerHTML = 'like';
+    likeButton.innerHTML = 'like post above';
     // likeButton.type = 'button'; // may not be necessary
     likeButton.name = 'like-button';
     likeButton.value = postID;
@@ -60,7 +60,7 @@ function likePost(likeButton) {
     const body = JSON.stringify({'_id': postID}); // is this enough? we valid them in the python file
 
     request.onload = () => {
-      if (request.readyState == 4 && request.status == 201) {
+      if (request.readyState == 4 && request.status == 200) { // neem: changed 201 to 200
         console.log(JSON.parse(request.responseText));
       } else {
         console.log(`Error: ${request.status}`);
