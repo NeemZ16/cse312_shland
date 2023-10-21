@@ -232,14 +232,13 @@ def login():
     if "Cookie" in request.headers and "auth_token" in checking_cookie:
         abort(401, 'Already logged in as a user')
 
-
     if username and password:
         db_pass = user_collection.find_one({"username": username})  # finds a specific user
 
         if db_pass:  # if that user exists
 
             hash_pass = db_pass["password"]  # grab whats stored as their password
-            if bcrypt.checkpw(password.encode("utf-8"), hash_pass):  #if the passwords match
+            if bcrypt.checkpw(password.encode("utf-8"), hash_pass):  # if the passwords match
                 auth_token = secrets.token_urlsafe(32)
                 hashed_token = hashlib.sha256(auth_token.encode("utf-8")).hexdigest()
                 user_collection.update_one({"username": username}, {"$set": {"auth_token": hashed_token}})
@@ -341,26 +340,28 @@ def like_post():
 
     if user:
         username = user['username']
-        # update the post's like in db
         # get post id (from request body) and db.posts.find_one({"_id": postID})
-        body = request.get_json(force=True)         # should get json from payload
-        postID = body["_id"]
+        body = request.get_json(force=True)         # body is dict
+        postID = ObjectId(body['_id'])
         post = db.posts.find_one({"_id": postID})
 
         # if username in likers of post: decrement like count and remove username from likers
         # else increment like count and add username to likers
         if post:
+            print("post found", file=sys.stderr)    # debugging
             count = post['like-count']
             likers = post['likers']
             if username in likers:
                 count -= 1
                 likers.remove(username)
+                print("username in likers", file=sys.stderr)    # debugging
             else:
                 count += 1
                 likers.append(username)
+                print("username not in likers", file=sys.stderr)    # debugging
 
             # db.posts.update_one with the new like count and likers
-            db.posts.update_one({'_id': postID}, {'$set': {'likers': likers, 'like-count': count}})
+            db.posts.update_one({'_id': postID}, {"$set": {'likers': likers, 'like-count': count}})
 
     else:
         abort(401, "User authentication failed")
