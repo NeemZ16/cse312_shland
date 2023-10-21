@@ -300,14 +300,12 @@ def create_post():
         'likers': [] # list of objects i.e., {'name': True/False}
     }
 
-
     db.posts.insert_one(post)
 
     # get id (i dont think we need this rn)
     # cursor = db.posts.find(post)
     # objectID = cursor['_id']
     # print(str(objectID))
-    
 
     return redirect('http://localhost:8080', code=301)
 
@@ -349,17 +347,27 @@ def like_post():
         postID = body["_id"]
         post = db.posts.find_one({"_id": postID})
 
-        # if user in likers of post: decrement like count and remove username from likers
+        # if username in likers of post: decrement like count and remove username from likers
         # else increment like count and add username to likers
+        if post:
+            count = post['like-count']
+            likers = post['likers']
+            if username in likers:
+                count -= 1
+                likers.remove(username)
+            else:
+                count += 1
+                likers.append(username)
 
+            # db.posts.update_one with the new like count and likers
+            db.posts.update_one({'_id': postID}, {'$set': {'likers': likers, 'like-count': count}})
 
-        # db.posts.update_one with the new like count and likers
     else:
         abort(401, "User authentication failed")
 
     return redirect('http://localhost:8080', code=301)
 
-# what's this method for?
+
 # @app.route('/get_likes', method=['GET'])
 # def get_likes():
 #     pass
