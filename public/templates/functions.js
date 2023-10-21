@@ -38,11 +38,11 @@ function clearPosts() {
 function addPost(post) {
     const postList = document.getElementById('post-list');
     const postItem = document.createElement('li');
-    postItem.innerText = `${post.username}: ${post.title} - ${post.description}`;
+    postItem.innerText = `${post.username}: ${post.title} - ${post.description} - likes: ${post.likecount}`;
     postList.appendChild(postItem);
 
     var postID = post._id // record post id
-    var likeCount = post.likeCount;
+    // var likeCount = post.likeCount;
     var likeButton = document.createElement('button'); // create like button
     likeButton.innerHTML = 'like post above';
     // likeButton.type = 'button'; // may not be necessary

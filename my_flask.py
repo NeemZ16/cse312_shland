@@ -295,7 +295,7 @@ def create_post():
         'title': title,
         'description': description,
         'username': username, # may change to 'poster'
-        'like-count': 0, # added like count
+        'likecount': 0, # added like count
         'likers': [] # list of objects i.e., {'name': True/False}
     }
 
@@ -349,7 +349,7 @@ def like_post():
         # else increment like count and add username to likers
         if post:
             print("post found", file=sys.stderr)    # debugging
-            count = post['like-count']
+            count = post['likecount']
             likers = post['likers']
             if username in likers:
                 count -= 1
@@ -361,7 +361,7 @@ def like_post():
                 print("username not in likers", file=sys.stderr)    # debugging
 
             # db.posts.update_one with the new like count and likers
-            db.posts.update_one({'_id': postID}, {"$set": {'likers': likers, 'like-count': count}})
+            db.posts.update_one({'_id': postID}, {"$set": {'likers': likers, 'likecount': count}})
 
     else:
         abort(401, "User authentication failed")
