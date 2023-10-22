@@ -67,3 +67,8 @@ ul li{
 ul li::before{
     position: absolute;
 }
+
+.listWrapper {
+    max-height:150px;
+    overflow-y:auto;
+}
