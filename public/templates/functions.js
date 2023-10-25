@@ -1,16 +1,13 @@
 function welcome() {
     document.getElementById("paragraph").innerHTML += "<br/>JavaScript text is so 😀 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯"
-
-
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
             sendChat();
         }
     });
-
     document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀";
-
     updatePosts();
+    updateQuizQuestions();
     console.log("yes");
     setInterval(updatePosts, 2000);
 }
@@ -30,9 +27,30 @@ function updatePosts() {
     request.send();
 }
 
+function updateQuizQuestions() {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            clearQuiz();
+            const questions = JSON.parse(this.response);
+            console.log(questions)
+            for (const question of questions) {
+                addQuestion(question);
+            }
+        }
+    };
+    request.open("GET", "/get-quiz");
+    request.send();
+}
+
 function clearPosts() {
     const postList = document.getElementById('post-list');
     postList.innerHTML = '';
+}
+
+function clearQuiz() {
+    const questions = document.getElementById('questions-list');
+    questions.innerHTML = '';
 }
 
 function addPost(post) {
@@ -53,13 +71,17 @@ function addPost(post) {
     postList.appendChild(likeButton) // append cb to li
 }
 
+function addQuestion(question) {
+    const questionList = document.getElementById('question-list');
+    const question = document.createElement('li');
+    question.innerText = `${question.title}\n${question.description}\n${question.options}`;
+    questionList.appendChild(question);
+}
+
 function likePost(likeButton) {
     const request = new XMLHttpRequest();
     request.open("POST", "/like-post");
-
     const postID = likeButton.value;
     const body = JSON.stringify({'_id': postID}); // is this enough? we valid them in the python file
-
-
     request.send(body);
 }
