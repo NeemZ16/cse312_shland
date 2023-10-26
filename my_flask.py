@@ -377,23 +377,36 @@ def create_quiz():
     authCookie = request.headers.get("Cookie")
     if not authCookie or "auth_token" not in authCookie:
         abort(401, "Only authenticated users can create quiz questions")
+    authToken = None
+    cookies = {}
+    if authCookie:
+        pairs = authCookie.split(';')
+        for cookie in pairs:
+            key, value = cookie.strip().split("=", 1)
+            cookies[key] = value
 
+    if "auth_token" in cookies:
+        authToken = cookies["auth_token"]
+    else:
+        abort(401, "User authentication failed")
+
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user = user_collection.find_one({"auth_token": hashedToken})
+    if user:
+        username = user['username']
+    else:
+        abort(401, "User authentication failed")
     title = escape_html(request.form.get("quiz-title"))
-    answer_1 = escape_html(request.form.get("answer-1"))
-    answer_2 = escape_html(request.form.get("answer-2"))
-    answer_3 = escape_html(request.form.get("answer-3"))
-    answer_4 = escape_html(request.form.get("answer-4"))
+    description = [escape_html(answer) for answer in request.form.getlist("answers[]")]
     image = request.files.get('quizImage')
     answer = int(escape_html(request.form.get('correct_answer')))
 
     quizQ = {
         'title': title,
-        'answer1': answer_1,
-        'answer2': answer_2,
-        'answer3': answer_3,
-        'answer4': answer_4,
+        'description': description,
         'image': image.read() if image else None,  # bytes
         'correct_answer': answer,
+        'username': username
     }
     db.quiz.insert_one(quizQ)
 

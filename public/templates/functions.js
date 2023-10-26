@@ -73,8 +73,34 @@ function addPost(post) {
 function addQuestion(question) {
     const questionList = document.getElementById('quiz-list');
     const questionItem = document.createElement('li');
-    questionItem.innerText = `${question.title}`;
+    questionItem.innerHTML = `${question.username}: <strong>${question.title}</strong><br>${question.description}<br>${question.image}`;
     questionList.appendChild(questionItem);
+
+    const answerContainer = document.createElement('div');
+    answerContainer.className = 'answer-container';
+
+    for (let i = 1; i <= 4; i++) {
+        const answerLabel = document.createElement('label');
+        answerLabel.setAttribute('for', `answer-${i}`);
+        answerLabel.textContent = `Answer ${i}`;
+
+        const answerInput = document.createElement('input');
+        answerInput.type = 'radio';
+        answerInput.name = `answer-${question._id}`;
+        answerInput.id = `answer-${i}`;
+        answerInput.value = i;
+
+        answerContainer.appendChild(answerInput);
+        answerContainer.appendChild(answerLabel);
+    }
+
+    questionList.appendChild(answerContainer);
+    var questionID = question._id
+    var submitButton = document.createElement('button'); 
+    submitButton.innerHTML = 'submit answer';
+    submitButton.name = 'submit-answer';
+    submitButton.value = questionID;
+    questionList.appendChild(submitButton) 
 }
 
 function likePost(likeButton) {
@@ -84,3 +110,5 @@ function likePost(likeButton) {
     const body = JSON.stringify({'_id': postID}); // is this enough? we valid them in the python file
     request.send(body);
 }
+
+
