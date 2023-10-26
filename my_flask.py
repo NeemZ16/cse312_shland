@@ -20,11 +20,12 @@ db = mongo_client["cse312"]
 # db.create_collection('posts')
 user_collection = db["users"]
 post_collection = db["posts"]
+quiz_collection = db["quiz"]
 
 # print('hello, printing mongo colletcions (local testing)')
 # print(db.list_collection_names())
 
-allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg"]
+allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg","quiztime.jpg"]
 
 # create instance of the class
 # __name__ is convenient shortcut to pass application's module/package
@@ -75,8 +76,9 @@ def index():
         username = "Guest"
 
     posts = db.posts.find()
+    quiz = db.quiz.find()
 
-    response = make_response(render_template('index.html', name=username, posts=posts, quiz_questions=quiz_questions))
+    response = make_response(render_template('index.html', name=username, posts=posts, quiz=quiz))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
@@ -370,32 +372,36 @@ def like_post():
 
     return redirect('http://localhost:8080', code=301)
 
-@app.route('/create-quiz-question', methods=['POST'])
-def create_quiz_question():
+@app.route('/create-quiz', methods=['POST'])
+def create_quiz():
     authCookie = request.headers.get("Cookie")
     if not authCookie or "auth_token" not in authCookie:
         abort(401, "Only authenticated users can create quiz questions")
 
-    title = escape_html(request.form.get("quiz_title"))
-    description = escape_html(request.form.get("quiz_description"))
-    image = request.files.get('image')
-    options = [escape_html(request.form.get(f'option{i}')) for i in range(1,5)]
+    title = escape_html(request.form.get("quiz-title"))
+    answer_1 = escape_html(request.form.get("answer-1"))
+    answer_2 = escape_html(request.form.get("answer-2"))
+    answer_3 = escape_html(request.form.get("answer-3"))
+    answer_4 = escape_html(request.form.get("answer-4"))
+    image = request.files.get('quizImage')
     answer = int(escape_html(request.form.get('correct_answer')))
 
-    quiz = {
+    quizQ = {
         'title': title,
-        'description': description,
+        'answer1': answer_1,
+        'answer2': answer_2,
+        'answer3': answer_3,
+        'answer4': answer_4,
         'image': image.read() if image else None,  # bytes
-        'options': options,
         'correct_answer': answer,
     }
-    db.quiz_questions.insert_one(quiz)
+    db.quiz.insert_one(quizQ)
 
     return redirect('http://localhost:8080', code=301)
 
 @app.route('/get-quiz', methods=['GET'])
 def get_quiz():
-    questions = list(db.quiz_questions.find())
+    questions = list(db.quiz.find())
     for question in questions:
         question['_id'] = str(question['_id'])
     return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}

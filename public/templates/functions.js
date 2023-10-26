@@ -1,11 +1,10 @@
 function welcome() {
-    document.getElementById("paragraph").innerHTML += "<br/>JavaScript text is so 😀 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯 🤯"
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
             sendChat();
         }
     });
-    document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀";
+
     updatePosts();
     updateQuizQuestions();
     console.log("yes");
@@ -49,7 +48,7 @@ function clearPosts() {
 }
 
 function clearQuiz() {
-    const questions = document.getElementById('questions-list');
+    const questions = document.getElementById('quiz-list');
     questions.innerHTML = '';
 }
 
@@ -72,10 +71,10 @@ function addPost(post) {
 }
 
 function addQuestion(question) {
-    const questionList = document.getElementById('question-list');
-    const question = document.createElement('li');
-    question.innerText = `${question.title}\n${question.description}\n${question.options}`;
-    questionList.appendChild(question);
+    const questionList = document.getElementById('quiz-list');
+    const questionItem = document.createElement('li');
+    questionItem.innerText = `${question.title}`;
+    questionList.appendChild(questionItem);
 }
 
 function likePost(likeButton) {
