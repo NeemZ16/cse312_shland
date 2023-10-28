@@ -73,22 +73,27 @@ function addPost(post) {
 function addQuestion(question) {
     const questionList = document.getElementById('quiz-list');
     const questionItem = document.createElement('li');
-    questionItem.innerHTML = `${question.username}: <strong>${question.title}</strong><br>${question.description}<br>${question.image}`;
+    questionItem.innerHTML = `${question.username}: <strong>${question.title}</strong><br>${question.description}<br>`;
     questionList.appendChild(questionItem);
+
+    const imageElement = document.createElement('img');
+    //imageElement.alt = `Question Image`;
+    imageElement.src = `/uploads/${question.image}`;
+    questionItem.appendChild(imageElement);
 
     const answerContainer = document.createElement('div');
     answerContainer.className = 'answer-container';
 
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 0; i < question.choices.length; i++) {
         const answerLabel = document.createElement('label');
         answerLabel.setAttribute('for', `answer-${i}`);
-        answerLabel.textContent = `Answer ${i}`;
+        answerLabel.textContent = `${question.choices[i]}`;
 
         const answerInput = document.createElement('input');
         answerInput.type = 'radio';
         answerInput.name = `answer-${question._id}`;
         answerInput.id = `answer-${i}`;
-        answerInput.value = i;
+        answerInput.value = i + 1;
 
         answerContainer.appendChild(answerInput);
         answerContainer.appendChild(answerLabel);

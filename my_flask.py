@@ -1,4 +1,6 @@
-from flask import Flask, request, Response, current_app, render_template, make_response, abort, redirect
+import os.path
+
+from flask import Flask, request, Response, current_app, render_template, make_response, abort, redirect, send_from_directory
 from pymongo import MongoClient
 import json
 import bcrypt
@@ -6,6 +8,8 @@ import secrets
 import hashlib
 import sys
 from bson import ObjectId
+import time
+import random
 
 '''
 Resources:
@@ -27,10 +31,19 @@ quiz_collection = db["quiz"]
 # print(db.list_collection_names())
 
 allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg","quiztime.jpg"]
+UPLOADS = 'uploads'
 
 # create instance of the class
 # __name__ is convenient shortcut to pass application's module/package
 app = Flask(__name__, template_folder='public/templates')
+app.config['UPLOADS'] = UPLOADS
+os.makedirs(app.config['UPLOADS'], exist_ok=True)
+
+print("Checking for 'uploads' directory...")
+if os.path.exists('uploads') and os.path.isdir('uploads'):
+    print("The 'uploads' directory exists.")
+else:
+    print("The 'uploads' directory does not exist or is not a directory.")
 
 # HELPER FUNCS --------------------------------------------------------
 def escape_html(message):
@@ -41,6 +54,15 @@ def escape_html(message):
     escaped_message = escaped_message.replace("<", "&lt;")
 
     return escaped_message
+
+def generate_filename(filename):
+    timestamp = str(int(time.time()))
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    capAlpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    randomStr = ''.join(random.choices(alphabet+capAlpha, k=5))
+    filename, file_extension = os.path.splitext(filename)
+    uniqueName = f"{timestamp}_{randomStr}{file_extension}"
+    return uniqueName
 
 
 # PATHS (TEMPLATE/IMAGE RENDERING) ------------------------------------
@@ -398,14 +420,23 @@ def create_quiz():
     else:
         abort(401, "User authentication failed")
     title = escape_html(request.form.get("quiz-title"))
-    description = [escape_html(answer) for answer in request.form.getlist("answers[]")]
+    description = escape_html(request.form.get('description'))
+    choices = [escape_html(answer) for answer in request.form.getlist("answers[]")]
+
     image = request.files.get('quizImage')
+    image_name = None
+    if image:
+        image_name = generate_filename(image.filename)
+        image_path = os.path.join(app.config['UPLOADS'], image_name)
+        image.save(image_path)
+
     answer = int(escape_html(request.form.get('correct_answer')))
 
     quizQ = {
         'title': title,
         'description': description,
-        'image': image.read() if image else None,  # bytes
+        'choices': choices,
+        'image': image_name,
         'correct_answer': answer,
         'username': username
     }
@@ -419,6 +450,10 @@ def get_quiz():
     for question in questions:
         question['_id'] = str(question['_id'])
     return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
+
+@app.route('/uploads/<filename>', methods=['GET'])
+def upload_file(filename):
+    return send_from_directory(app.config['UPLOADS'], filename)
 
 if __name__ == "__main__":
     # Please do not set debug=True in production

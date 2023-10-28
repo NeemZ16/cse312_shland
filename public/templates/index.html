@@ -72,12 +72,13 @@
         </form>
         <br/>
         Create Quiz Question:
-        <form action="/create-quiz" method="post">
+        <form action="/create-quiz" method="post" enctype="multipart/form-data">
             <label for="quiz-title">Title:</label>
             <input id="quiz-title" type="text" name="quiz-title" required>
 
             <div class="question-label">
-                <label for="quiz-question">Choose the correct answer:</label>
+                <label for="description">Description:</label>
+                <input id="description" type="text" name="description" required>
             </div>
 
             <div class="answer-container">
