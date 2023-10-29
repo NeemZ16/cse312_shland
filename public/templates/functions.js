@@ -67,6 +67,7 @@ function addPost(post) {
     likeButton.value = postID;
     // likeButton.onclick = likePost(likeButton);
     likeButton.addEventListener("click", function () {likePost(likeButton)});
+    likeButton.style.marginLeft ='40px'
     postList.appendChild(likeButton) // append cb to li
 }
 
@@ -76,10 +77,13 @@ function addQuestion(question) {
     questionItem.innerHTML = `${question.username}: <strong>${question.title}</strong><br>${question.description}<br>`;
     questionList.appendChild(questionItem);
 
-    const imageElement = document.createElement('img');
-    //imageElement.alt = `Question Image`;
-    imageElement.src = `/uploads/${question.image}`;
-    questionItem.appendChild(imageElement);
+    if (question.image){
+        const imageElement = document.createElement('img');
+        //imageElement.alt = `Question Image`;
+        imageElement.src = `/uploads/${question.image}`;
+        imageElement.classList.add('question-image');
+        questionItem.appendChild(imageElement);
+    }
 
     const answerContainer = document.createElement('div');
     answerContainer.className = 'answer-container';
@@ -95,16 +99,19 @@ function addQuestion(question) {
         answerInput.id = `answer-${i}`;
         answerInput.value = i + 1;
 
+        answerInput.style.marginLeft = '10px'; 
         answerContainer.appendChild(answerInput);
         answerContainer.appendChild(answerLabel);
     }
 
+    answerContainer.style.marginLeft = '35px'
     questionList.appendChild(answerContainer);
     var questionID = question._id
     var submitButton = document.createElement('button'); 
     submitButton.innerHTML = 'submit answer';
     submitButton.name = 'submit-answer';
     submitButton.value = questionID;
+    submitButton.style.marginLeft ='40px'
     questionList.appendChild(submitButton) 
 }
 

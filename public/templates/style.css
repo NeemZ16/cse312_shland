@@ -9,8 +9,9 @@ body {
 }
 
 p {
-    font-size: 18px;
+    font-size: 20px;
     font-style: italic;
+    text-align: center;
 }
 
 img.post {
@@ -19,6 +20,7 @@ img.post {
 
 .title{
     height: 5%;
+    text-align: center;
 }
 
 .header{
@@ -39,7 +41,7 @@ img.post {
 .user-list, .posts{
     width: 30%;
     background-color: #e1ca49;
-    padding: 20px;
+    padding: 15px;
 }
 .header > div{
     padding: 20px 0;
@@ -69,7 +71,7 @@ ul li::before{
 }
 
 .listWrapper {
-    max-height:150px;
+    max-height:385px;
     overflow-y:auto;
 }
 
@@ -100,4 +102,9 @@ ul li::before{
 
 .question-label {
     clear: both;
+}
+
+.question-image {
+    max-width: 170px;
+    max-height: 170px; 
 }
