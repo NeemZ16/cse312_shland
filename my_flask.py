@@ -1,4 +1,6 @@
-from flask import Flask, request, Response, current_app, render_template, make_response, abort, redirect
+import os.path
+
+from flask import Flask, request, Response, current_app, render_template, make_response, abort, redirect, send_from_directory
 from pymongo import MongoClient
 import json
 import bcrypt
@@ -6,6 +8,11 @@ import secrets
 import hashlib
 import sys
 from bson import ObjectId
+import time
+import random
+from flask_socketio import SocketIO, join_room, leave_room, send, emit
+import random
+from string import ascii_uppercase
 
 '''
 Resources:
@@ -21,15 +28,29 @@ db = mongo_client["cse312"]
 # db.create_collection('posts')
 user_collection = db["users"]
 post_collection = db["posts"]
+quiz_collection = db["quiz"]
 
-print('hello, printing mongo colletcions (local testing)')
-print(db.list_collection_names())
+# print('hello, printing mongo colletcions (local testing)')
+# print(db.list_collection_names())
 
-allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg"]
+# are we still using this?
+allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg","quiztime.jpg"]
+UPLOADS = 'uploads'
 
 # create instance of the class
 # __name__ is convenient shortcut to pass application's module/package
 app = Flask(__name__, template_folder='public/templates')
+
+socketio = SocketIO(app)
+
+app.config['UPLOADS'] = UPLOADS
+os.makedirs(app.config['UPLOADS'], exist_ok=True)
+
+print("Checking for 'uploads' directory...")
+if os.path.exists('uploads') and os.path.isdir('uploads'):
+    print("The 'uploads' directory exists.")
+else:
+    print("The 'uploads' directory does not exist or is not a directory.")
 
 # HELPER FUNCS --------------------------------------------------------
 def escape_html(message):
@@ -41,17 +62,32 @@ def escape_html(message):
 
     return escaped_message
 
+def generate_filename(filename):
+    timestamp = str(int(time.time()))
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    capAlpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    randomStr = ''.join(random.choices(alphabet+capAlpha, k=5))
+    filename, file_extension = os.path.splitext(filename)
+    uniqueName = f"{timestamp}_{randomStr}{file_extension}"
+    return uniqueName
+
 
 # PATHS (TEMPLATE/IMAGE RENDERING) ------------------------------------
+
+# CODE FOR WEBSOCKETS -------------------------------
+
+quizQ = {}
+
+
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
 def index():
     if request.headers.get("Cookie") is not None:
-        print("cookies exist", file=sys.stderr)
+        # print("cookies exist", file=sys.stderr)
         if "auth_token" in request.headers.get("Cookie"):
-            print("name is not guest", file=sys.stderr)
+            # print("name is not guest", file=sys.stderr)
 
             cookie_kvps = {}
             cookies_as_list = request.headers.get("Cookie").split(";")
@@ -72,12 +108,13 @@ def index():
         else:
             username = "Guest"
     else:
-        print("user is guest", file=sys.stderr)
+        # print("user is guest", file=sys.stderr)
         username = "Guest"
 
     posts = db.posts.find()
+    quiz = db.quiz.find()
 
-    response = make_response(render_template('index.html', name=username, posts=posts))
+    response = make_response(render_template('index.html', name=username, posts=posts, quiz=quiz))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
@@ -124,8 +161,8 @@ def send_image(image):
 @app.route('/visit-counter', methods=['GET'])
 def send_cookie():
     new_cookie = request.headers.get("Cookie", "visits=0")
-    print("Existing cookie", file=sys.stderr)
-    print(new_cookie, file=sys.stderr)
+    # print("Existing cookie", file=sys.stderr)
+    # print(new_cookie, file=sys.stderr)
 
     cookie_kvps = {}
     if "Cookie" in request.headers and "visits" in new_cookie:
@@ -187,7 +224,7 @@ def send_cookie():
 @app.route('/register', methods=['POST'])
 def register():
     # user_collection = db["users"]
-    print("registering")
+    # print("registering")
 
     username = request.form.get("username_reg")
     password = request.form.get("password_reg")
@@ -197,31 +234,31 @@ def register():
     found_user = user_collection.find_one({"username": username})
 
     if found_user is not None:
-        print("users exist:")
-        print(found_user)
+        # print("users exist:")
+        # print(found_user)
         abort(401, 'user already exists')
 
-    print("username")
-    print(type(username))
-    print(username)
-    print("password")
-    print(password)
+    # print("username")
+    # print(type(username))
+    # print(username)
+    # print("password")
+    # print(password)
 
     if username and password:
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         user_and_pass = {"username": username, "password": hashed}
-        print("user and pass")
-        print(user_and_pass)
+        # print("user and pass")
+        # print(user_and_pass)
         user_collection.insert_one(user_and_pass)
 
-    print("made it past database")
+    # print("made it past database")
     return redirect('http://localhost:8080', code=301)
 
 
 @app.route('/login', methods=['POST'])
 def login():
 
-    print("logging in")
+    # print("logging in")
 
     username = request.form.get("username_login")
     password = request.form.get("password_login")
@@ -247,6 +284,8 @@ def login():
                 response = redirect("/", code=302)
                 token_cookie = f"auth_token={auth_token}; Max-Age=3600; HttpOnly"
                 response.headers["Set-Cookie"] = token_cookie
+
+                get_quiz()
 
                 return response
 
@@ -299,6 +338,7 @@ def create_post():
         'likers': [] # list of objects i.e., {'name': True/False}
     }
 
+
     db.posts.insert_one(post)
 
     # get id (i dont think we need this rn)
@@ -320,7 +360,7 @@ def like_post():
     # authenticate user
     authCookie = request.headers.get("Cookie")
     if not authCookie or "auth_token" not in authCookie:
-        print('hello')
+        # print('hello')
         abort(401, "Only authenticated users can like posts")
 
     authToken = None
@@ -349,17 +389,17 @@ def like_post():
         # if username in likers of post: decrement like count and remove username from likers
         # else increment like count and add username to likers
         if post:
-            print("post found", file=sys.stderr)    # debugging
+            # print("post found", file=sys.stderr)    # debugging
             count = post['likecount']
             likers = post['likers']
             if username in likers:
                 count -= 1
                 likers.remove(username)
-                print("username in likers", file=sys.stderr)    # debugging
+                # print("username in likers", file=sys.stderr)    # debugging
             else:
                 count += 1
                 likers.append(username)
-                print("username not in likers", file=sys.stderr)    # debugging
+                # print("username not in likers", file=sys.stderr)    # debugging
 
             # db.posts.update_one with the new like count and likers
             db.posts.update_one({'_id': postID}, {"$set": {'likers': likers, 'likecount': count}})
@@ -369,12 +409,88 @@ def like_post():
 
     return redirect('http://localhost:8080', code=301)
 
+@app.route('/create-quiz', methods=['POST'])
+def create_quiz():
+    authCookie = request.headers.get("Cookie")
+    if not authCookie or "auth_token" not in authCookie:
+        abort(401, "Only authenticated users can create quiz questions")
+    authToken = None
+    cookies = {}
+    if authCookie:
+        pairs = authCookie.split(';')
+        for cookie in pairs:
+            key, value = cookie.strip().split("=", 1)
+            cookies[key] = value
 
-# @app.route('/get_likes', method=['GET'])
-# def get_likes():
-#     pass
+    if "auth_token" in cookies:
+        authToken = cookies["auth_token"]
+    else:
+        abort(401, "User authentication failed")
 
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user = user_collection.find_one({"auth_token": hashedToken})
+    if user:
+        username = user['username']
+    else:
+        abort(401, "User authentication failed")
+    title = escape_html(request.form.get("quiz-title"))
+    description = escape_html(request.form.get('description'))
+    choices = [escape_html(answer) for answer in request.form.getlist("answers[]")]
+
+    image = request.files.get('quizImage')
+    image_name = None
+    if image:
+        image_name = generate_filename(image.filename)
+        image_path = os.path.join(app.config['UPLOADS'], image_name)
+        image.save(image_path)
+
+    answer = int(escape_html(request.form.get('correct_answer')))
+
+    quizQ = {
+        'title': title,
+        'description': description,
+        'choices': choices,
+        'image': image_name,
+        'correct_answer': answer,
+        'username': username
+    }
+    db.quiz.insert_one(quizQ)
+
+    del quizQ["_id"]
+    return redirect('http://localhost:8080', code=301)
+    # return Response(status=200)
+
+@app.route('/get-quiz', methods=['GET'])
+def get_quiz():
+    questions = list(db.quiz.find())
+    for question in questions:
+        question['_id'] = str(question['_id'])
+    return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
+
+@app.route('/uploads/<filename>', methods=['GET'])
+def upload_file(filename):
+    return send_from_directory(app.config['UPLOADS'], filename)
+
+
+@socketio.on('connect')
+def connect(auth):
+    send("User has connected")
+    print("user connected", file=sys.stderr)
+
+@socketio.on('message')
+def message(message):
+
+    # print("Received message: " + message, file=sys.stderr)
+    if message != "User connected!":
+        send(message, broadcast=True)
+
+
+# def handle_join_room_event(data):
+#     print("message_received:" + str(data), file=sys.stderr)
+#     app.logger.info("{} has joined the Quiz app".format(data['username']))
+#     join_room("Quiz app")
+#     socketio.emit('join_room_announcement', data)
 
 if __name__ == "__main__":
     # Please do not set debug=True in production
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    socketio.run(app, host="0.0.0.0", port=8080, debug=True)

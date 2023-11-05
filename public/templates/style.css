@@ -1,16 +1,17 @@
 
 body {
-    background-color: #133333;
+    background-color: #4b1b75;
     color: white;
 }
 
 .my_image {
-    width: 200px;
+    width: 175px;
 }
 
 p {
-    font-size: 18px;
+    font-size: 20px;
     font-style: italic;
+    text-align: center;
 }
 
 img.post {
@@ -19,13 +20,14 @@ img.post {
 
 .title{
     height: 5%;
+    text-align: center;
 }
 
 .header{
     display: flex;
-    background-color: #F6F1F1;
+    background-color: #ffffff;
     color: black;
-    height: 29%;
+    height: 25%;
     align-items: center;
     justify-content: center;
 }
@@ -33,13 +35,13 @@ img.post {
 .contents{
     display: flex;
     justify-content: space-around;
-    height: 50%
+    height: 70%
 }
 
 .user-list, .posts{
     width: 30%;
-    background-color: #BAB86C;
-    padding: 20px;
+    background-color: #e1ca49;
+    padding: 15px;
 }
 .header > div{
     padding: 20px 0;
@@ -69,6 +71,40 @@ ul li::before{
 }
 
 .listWrapper {
-    max-height:150px;
+    max-height:385px;
     overflow-y:auto;
+}
+
+.quiz-question-form {
+    background-color: #e1ca49;
+    padding: 20px;
+}
+
+.quiz-question-form label {
+    display: block;
+    margin-top: 10px;
+}
+
+.quiz-question-form .answer-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.quiz-question-form .answer-container label {
+    width: 100px;
+    margin-right: 10px;
+}
+
+.quiz-question-form .answer-container input[type="text"] {
+    flex: 1;
+}
+
+.question-label {
+    clear: both;
+}
+
+.question-image {
+    max-width: 170px;
+    max-height: 170px;
 }

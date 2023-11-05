@@ -1,3 +1,5 @@
 flask==2.3.3
 pymongo
 bcrypt
+flask-socketio
+eventlet
