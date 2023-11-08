@@ -1,6 +1,6 @@
 import os.path
 
-from flask import Flask, request, Response, current_app, render_template, make_response, abort, redirect, send_from_directory
+from flask import Flask, request, render_template, make_response, abort, redirect, send_from_directory, session
 from pymongo import MongoClient
 import json
 import bcrypt
@@ -21,8 +21,8 @@ https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%2
 '''
 
 # DB AND ALLOWED IMAGE SET UP -----------------------------------------
-mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
 # db.create_collection('users')
 # db.create_collection('posts')
@@ -40,7 +40,7 @@ UPLOADS = 'uploads'
 # create instance of the class
 # __name__ is convenient shortcut to pass application's module/package
 app = Flask(__name__, template_folder='public/templates')
-
+app.config['SECRET_KEY'] = 'asdfghj' # keep in order to use sessions
 socketio = SocketIO(app)
 
 app.config['UPLOADS'] = UPLOADS
@@ -78,12 +78,22 @@ def generate_filename(filename):
 
 quizQ = {}
 
+rooms = {}
+def generate_unique_code(length):
+    code = ''
+    while True:
+        for _ in range(length):
+            code += random.choice(ascii_uppercase)
+        if code not in rooms:
+            break
+    return code
 
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
 def index():
+    session.clear()
     if request.headers.get("Cookie") is not None:
         # print("cookies exist", file=sys.stderr)
         if "auth_token" in request.headers.get("Cookie"):
@@ -132,11 +142,28 @@ def style():
 
     return response
 
+@app.route('/quiz.css', methods=['GET'])
+def quiz_style():
+    response = make_response(render_template('quiz.css'))
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Type"] = "text/css; charset=utf-8"
+    # response.headers["Content-Length"] = str(len(open("public/templates/style.css").read()))
+
+    return response
 
 @app.route('/javascript', methods=['GET'])
 @app.route('/functions.js', methods=['GET'])
 def javascript():
     response = make_response(render_template('functions.js'))
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Type"] = "text/javascript; charset=utf-8"
+    # response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
+
+    return response
+
+@app.route('/quiz.js', methods=['GET'])
+def quiz_javascript():
+    response = make_response(render_template('quiz.js'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/javascript; charset=utf-8"
     # response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
@@ -471,18 +498,85 @@ def get_quiz():
 def upload_file(filename):
     return send_from_directory(app.config['UPLOADS'], filename)
 
+@app.route('/obj2', methods=['GET', 'POST'])
+def foo():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        code = request.form.get('code')
+        join = request.form.get('join', False)
+        create = request.form.get('create', False)
+
+        if not name:
+            return render_template('quizhome.html', error='Please enter a name', code=code, name=name)
+
+        if join != False and not code:
+            return render_template('quizhome.html', error='Please enter a room code', code=code, name=name)
+
+        room = code
+        if create != False:
+            room = generate_unique_code(4)
+            rooms[room] = {'creator': name ,"members": []}
+
+        elif code not in rooms:
+            return render_template('quizhome.html', error='Quiz does not exist', code=code, name=name)
+
+        session['room'] = room
+        session['name'] = name
+
+        return redirect('/room', code=302)
+
+    return render_template('quizhome.html')
+
+@app.route('/room')
+def room():
+    room = session.get('room')
+    # if room is None or session.get('name') is None or room not in rooms:
+    #     return redirect('/obj2')
+
+    return render_template('room.html', code=room)
+
+@app.route('/quiz')
+def quiz():
+    return render_template('quiz.html')
 
 @socketio.on('connect')
 def connect(auth):
-    send("User has connected")
-    print("user connected", file=sys.stderr)
+    # send("User has connected")
+    # print("user connected", file=sys.stderr)
+    room = session.get('room')
+    name = session.get('name') # might change to username
+    if not room or not name:
+        return
+    if room not in rooms:
+        leave_room(room)
+        return
 
-@socketio.on('message')
-def message(message):
+    join_room(room)
+    send({'name': name, 'message': 'has entered the room'})
+    rooms[room]['members'].append(name) # def change to username here, given auth key
+    print(str(name) + ' joined room ' + str(room), file=sys.stderr)
 
-    # print("Received message: " + message, file=sys.stderr)
-    if message != "User connected!":
-        send(message, broadcast=True)
+@socketio.on('disconnect')
+def disconnect():
+    room = session.get('room')
+    name = session.get('name')
+    leave_room(room)
+
+    if room in rooms:
+        rooms[room]['members'].remove(name)
+        if len(rooms[room]['members']) <= 0:
+            del rooms[room]
+
+    send({'name': name, 'message': 'has left the room'})
+    
+
+
+# @socketio.on('message')
+# def message(message):
+
+#     # print("Received message: " + message, file=sys.stderr)
+#     if message != "User connected!":
+#         send(message, broadcast=True)
 
 
 # def handle_join_room_event(data):

@@ -108,3 +108,37 @@ ul li::before{
     max-width: 170px;
     max-height: 170px;
 }
+
+.members-box {
+    border-color: black;
+    border-radius: 10px;
+    border-width: 5px;
+    border-style: solid;
+    background-color: grey;
+    height: 40%%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+
+}
+
+.members {
+    overflow-y: scroll;
+    flex 1;
+    height: 100%;
+}
+
+.inputs {
+    padding: 10px;
+    display: flex;
+}
+
+h2 {
+    text-align: center;
+}
+
+.screen-name-btn {
+    width: 90px;
+    height: 30px;
+}

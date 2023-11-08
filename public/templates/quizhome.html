@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="'en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Chat App</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+        <script src="functions.js"></script>
+    </head>
+
+    <body>
+        <div class="content"> 
+            <form method='post'>
+                <h3>Enter The Quiz Room</h3>
+                <div>
+                    <label>Name:</label>
+                    <input type="text" placeholder="Pick a quiz name!" name='name' value={{name}}/>
+                </div>
+                <div class="join">
+                    <input type="text" placeholder="Room Code" name='code' value={{name}}/>
+                    <button type="submit" name='join' class='join-btn'>Join a Room</button>
+                </div>
+                    <button type="submit" name='create' class='create-btn'>Create a Room</button>
+                {% if error %}
+                <ul>
+                    <li>{{error}}</li>
+                </ul>
+                {% endif %}
+            </form>    
+        </div>
+    </body>
+</html>
