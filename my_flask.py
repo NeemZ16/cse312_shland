@@ -568,7 +568,14 @@ def disconnect():
 
 @app.route('/grades', methods=['GET'])
 def gradebook():
-    # authenticate user
+    """
+    variables to replace in html file:
+        user: str - username of logged-in user
+        created_questions: dict(tuple(title:str, description:str)->list(tuple(username:str, grade:int)))
+            - maps each question title, desc to list of all answers for that question
+        own_answers: list(tuple(title, description, grade))
+            - list of all grades for questions answered by user, with corresponding question title and desc
+    """
     authToken = request.cookies.get("auth_token")
     if not authToken:
         abort(401, "User authentication failed, only logged in users can see grades")
@@ -576,12 +583,18 @@ def gradebook():
     user_record = user_collection.find_one({"auth_token": hashedToken})
 
     if user_record:
-        # user authenticated -- rest of the code should go here
+        # user authenticated
         user = user_record["username"]
-        # TODO: get all quiz questions created by user from quiz collection
-        # TODO: get all answers to the quiz questions created by user from answer collection
+        question_records = quiz_collection.find({"username": user})  # questions created by user
+
+        if question_records:
+            # get all answers to the quiz questions created by user from answer collection
+            for record in question_records:
+                answer_records = ans_collection.find({"questionID": record["_id"]})
+
         # TODO: get all answers answered by user from answer collection
-        # TODO: arrange everything into the html and send response with html added/replaced
+
+        # TODO: make response with html variables replaced
         pass
     else:
         abort(401, "User authentication failed, user not found")
@@ -591,7 +604,6 @@ def grades_style():
     response = make_response(render_template('grades.css'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/css; charset=utf-8"
-    # response.headers["Content-Length"] = str(len(open("public/templates/style.css").read()))
 
 # @socketio.on('message')
 # def message(message):

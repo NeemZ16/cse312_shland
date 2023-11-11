@@ -7,22 +7,30 @@
 </head>
 <body>
 <div class="header">
-    <!--note to self: replace with {{user}}'s gradebook if time allows-->
-    <h1>Gradebook:</h1>
+    <h1>{{ user }}'s Gradebook:</h1>
 </div>
 <div class="contents">
     <div class="grade-container">
         <h2>Questions you've created:</h2>
+
+        {% for question in created_questions.keys() %}
         <table class="grades-table">
-            <caption>Question Title: {{ title }}</caption>
-            <caption>Question Description: {{ desc }}</caption>
+            <caption>Question Title: {{ question[0] }}</caption>
+            <caption>Question Description: {{ question[1] }}</caption>
             <tr>
                 <th>User</th>
-                <th>Score</th>
+                <th>Grade</th>
             </tr>
-            <!--plan: add table rows with each user and score from server-->
+            {% for answer_data in created_questions[question] %}
+            <tr>
+                {% for cell in answer_data %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
         </table>
-        <!--plan: add table for each question-->
+        {% endfor %}
+
     </div>
     <div class="grade-container">
         <h2>Your own grades:</h2>
@@ -30,9 +38,17 @@
             <tr>
                 <th>Question Title</th>
                 <th>Description</th>
-                <th>Your Score</th>
+                <th>Your Grade</th>
             </tr>
-            <!--plan: add table rows with each question and score from server-->
+
+            {% for answer_data in own_answers %}
+            <tr>
+                {% for cell in answer_data %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+
         </table>
     </div>
 </div>
