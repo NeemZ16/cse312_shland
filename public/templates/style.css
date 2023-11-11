@@ -142,3 +142,11 @@ h2 {
     width: 90px;
     height: 30px;
 }
+
+.grade-btn {
+    width: 200px;
+    height: 30px;
+    background-color: #e1ca49;
+    font-family: monospace;
+    border-radius: 50px;
+}

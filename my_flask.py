@@ -566,6 +566,33 @@ def disconnect():
 
     send({'name': name, 'message': 'has left the room'})
 
+@app.route('/grades', methods=['GET'])
+def gradebook():
+    # authenticate user
+    authToken = request.cookies.get("auth_token")
+    if not authToken:
+        abort(401, "User authentication failed, only logged in users can see grades")
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user_record = user_collection.find_one({"auth_token": hashedToken})
+
+    if user_record:
+        # user authenticated -- rest of the code should go here
+        user = user_record["username"]
+        # TODO: get all quiz questions created by user from quiz collection
+        # TODO: get all answers to the quiz questions created by user from answer collection
+        # TODO: get all answers answered by user from answer collection
+        # TODO: arrange everything into the html and send response with html added/replaced
+        pass
+    else:
+        abort(401, "User authentication failed, user not found")
+
+@app.route('/grades.css', methods=['GET'])
+def grades_style():
+    response = make_response(render_template('grades.css'))
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Type"] = "text/css; charset=utf-8"
+    # response.headers["Content-Length"] = str(len(open("public/templates/style.css").read()))
+
 # @socketio.on('message')
 # def message(message):
 

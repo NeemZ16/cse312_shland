@@ -17,13 +17,13 @@ table, th, td {
     height: 25%;
     align-items: center;
     justify-content: center;
-    border-radius: 25px;
+    border-radius: 15px;
 }
 
 .grade-container {
     padding-left: 25px;
     padding-right: 25px;
-    border-radius: 25px;
+    border-radius: 15px;
     color: black;
     background-color: #e1ca49;
 }
