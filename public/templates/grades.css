@@ -1,0 +1,25 @@
+body {
+    background-color: #4b1b75;
+    color: white;
+    font-family: monospace;
+}
+
+table, th, td {
+    border: 1px solid #000;
+}
+
+.header{
+    display: flex;
+    background-color: #ffffff;
+    color: black;
+    height: 25%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+}
+
+.grade-container {
+    border-radius: 25px;
+    color: black;
+    background-color: #e1ca49;
+}

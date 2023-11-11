@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>shland gradebook - P3 Obj 3</title>
+    <link rel="stylesheet" type="text/css" href="grades.css"/>
+</head>
+<body>
+<div class="header">
+    <!--note to self: replace with {{user}}'s gradebook if time allows-->
+    <h1>Gradebook:</h1>
+</div>
+<div class="contents">
+    <div class="grade-container">
+        <h2>Questions you've created:</h2>
+        <table>
+            <caption>Question Title: {{title}}</caption>
+            <caption>Question Description: {{desc}}</caption>
+            <tr>
+                <th>User</th>
+                <th>Score</th>
+            </tr>
+            <!--plan: add table rows with each user and score from server-->
+        </table>
+    </div>
+    <div class="grade-container">
+        <h2>Your own grades:</h2>
+        <table>
+            <tr>
+                <th>Question Title</th>
+                <th>Description</th>
+                <th>Your Score</th>
+            </tr>
+            <!--plan: add table rows with each question and score from server-->
+        </table>
+    </div>
+</div>
+</body>
+</html>
