@@ -6,6 +6,8 @@ body {
 
 table, th, td {
     border: 1px solid #000;
+    border-collapse: collapse;
+    padding: 5px;
 }
 
 .header{
@@ -19,7 +21,14 @@ table, th, td {
 }
 
 .grade-container {
+    padding-left: 25px;
+    padding-right: 25px;
     border-radius: 25px;
     color: black;
     background-color: #e1ca49;
+}
+
+.grades-table {
+    width: 100%;
+    justify-content: center;
 }
