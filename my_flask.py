@@ -21,26 +21,25 @@ https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%2
 '''
 
 # DB AND ALLOWED IMAGE SET UP -----------------------------------------
-# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
-# db.create_collection('users')
-# db.create_collection('posts')
 user_collection = db["users"]
 post_collection = db["posts"]
 quiz_collection = db["quiz"]
+ans_collection = db["answers"]
 
-# print('hello, printing mongo colletcions (local testing)')
+# print('hello, printing mongo collections (local testing)')
 # print(db.list_collection_names())
 
 # are we still using this?
-allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg","quiztime.jpg"]
+allowed_images = ["eagle.jpg", "flamingo.jpg", "apple.jpg", "quiztime.jpg"]
 UPLOADS = 'uploads'
 
 # create instance of the class
 # __name__ is convenient shortcut to pass application's module/package
 app = Flask(__name__, template_folder='public/templates')
-app.config['SECRET_KEY'] = 'asdfghj' # keep in order to use sessions
+app.config['SECRET_KEY'] = 'asdfghj'  # keep in order to use sessions
 socketio = SocketIO(app)
 
 app.config['UPLOADS'] = UPLOADS
@@ -301,12 +300,11 @@ def login():
 
         if db_pass:  # if that user exists
 
-            hash_pass = db_pass["password"]  # grab whats stored as their password
+            hash_pass = db_pass["password"]  # grab what's stored as their password
             if bcrypt.checkpw(password.encode("utf-8"), hash_pass):  # if the passwords match
                 auth_token = secrets.token_urlsafe(32)
                 hashed_token = hashlib.sha256(auth_token.encode("utf-8")).hexdigest()
                 user_collection.update_one({"username": username}, {"$set": {"auth_token": hashed_token}})
-
 
                 response = redirect("/", code=302)
                 token_cookie = f"auth_token={auth_token}; Max-Age=3600; HttpOnly"
@@ -348,7 +346,7 @@ def create_post():
     hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
     user = user_collection.find_one({"auth_token": hashedToken})
 
-    #since grabbing username from DB, is it enough to get away with security check?
+    # since grabbing username from DB, is it enough to get away with security check?
     if user:
         username = user['username']
     else:
@@ -360,15 +358,14 @@ def create_post():
     post = {
         'title': title,
         'description': description,
-        'username': username, # may change to 'poster'
-        'likecount': 0, # added like count
-        'likers': [] # list of objects i.e., {'name': True/False}
+        'username': username,  # may change to 'poster'
+        'likecount': 0,  # added like count
+        'likers': []  # list of objects i.e., {'name': True/False}
     }
-
 
     db.posts.insert_one(post)
 
-    # get id (i dont think we need this rn)
+    # get id (I don't think we need this rn)
     # cursor = db.posts.find(post)
     # objectID = cursor['_id']
     # print(str(objectID))
@@ -509,13 +506,13 @@ def foo():
         if not name:
             return render_template('quizhome.html', error='Please enter a name', code=code, name=name)
 
-        if join != False and not code:
+        if join and not code:
             return render_template('quizhome.html', error='Please enter a room code', code=code, name=name)
 
         room = code
-        if create != False:
+        if create:
             room = generate_unique_code(4)
-            rooms[room] = {'creator': name ,"members": []}
+            rooms[room] = {'creator': name, "members": []}
 
         elif code not in rooms:
             return render_template('quizhome.html', error='Quiz does not exist', code=code, name=name)
@@ -544,7 +541,7 @@ def connect(auth):
     # send("User has connected")
     # print("user connected", file=sys.stderr)
     room = session.get('room')
-    name = session.get('name') # might change to username
+    name = session.get('name')  # might change to username
     if not room or not name:
         return
     if room not in rooms:
@@ -553,7 +550,7 @@ def connect(auth):
 
     join_room(room)
     send({'name': name, 'message': 'has entered the room'})
-    rooms[room]['members'].append(name) # def change to username here, given auth key
+    rooms[room]['members'].append(name)  # def change to username here, given auth key
     print(str(name) + ' joined room ' + str(room), file=sys.stderr)
 
 @socketio.on('disconnect')
@@ -568,8 +565,6 @@ def disconnect():
             del rooms[room]
 
     send({'name': name, 'message': 'has left the room'})
-    
-
 
 # @socketio.on('message')
 # def message(message):
