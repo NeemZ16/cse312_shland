@@ -150,6 +150,14 @@ def quiz_style():
 
     return response
 
+@app.route('/grades.css', methods=['GET'])
+def grades_style():
+    response = make_response(render_template('grades.css'))
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Type"] = "text/css; charset=utf-8"
+
+    return response
+
 @app.route('/javascript', methods=['GET'])
 @app.route('/functions.js', methods=['GET'])
 def javascript():
@@ -617,12 +625,6 @@ def gradebook():
         return response
     else:
         abort(401, "User authentication failed, user not found")
-
-@app.route('/grades.css', methods=['GET'])
-def grades_style():
-    response = make_response(render_template('grades.css'))
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["Content-Type"] = "text/css; charset=utf-8"
 
 # @socketio.on('message')
 # def message(message):
