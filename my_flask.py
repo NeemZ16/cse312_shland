@@ -639,7 +639,7 @@ def gradebook():
                 own_answers.append(data)
 
         # make response with html variables replaced
-        response = make_response(render_template('grades.html', user=user, created_questions=created_questions, own_answers=own_answers))
+        response = make_response(render_template('grades.html', user=user, all_questions=created_questions, own_answers=own_answers))
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Content-Type"] = "text/html; charset=utf-8"
         return response

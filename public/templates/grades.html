@@ -13,7 +13,7 @@
 <div class="contents">
     <div class="grade-container">
         <h2>Questions you've created:</h2>
-        {%  for user_question in created_questions.keys() %}
+        {%  for user_question in all_questions.keys() %}
         <table class="grades-table">
                 <caption>Question Title: {{ user_question[0]}}</caption>
                 <caption>Question Description: {{ user_question[1]}}</caption>
@@ -21,7 +21,7 @@
                 <th>User</th>
                 <th>Score</th>
             </tr>
-            {% for all_answer in created_question[question] %}
+            {% for all_answer in all_questions[user_question] %}
             <tr>
                 {% for answer in all_answers %}
                    <td>{{ answer }}</td>
@@ -42,9 +42,9 @@
                 <th>Your Score</th>
             </tr>
             <tr>
-                {% for rows in user_answer  %}
+                {% for answer in user_answer  %}
                     <tr>
-                    {% for cell in rows %}
+                    {% for cell in answer %}
                         <td>
                         {{ cell }}
                         </td>
