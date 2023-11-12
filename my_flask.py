@@ -576,6 +576,7 @@ def gradebook():
         own_answers: list(tuple(title, description, grade))
             - list of all grades for questions answered by user, with corresponding question title and desc
     """
+
     authToken = request.cookies.get("auth_token")
     if not authToken:
         abort(401, "User authentication failed, only logged in users can see grades")
@@ -585,17 +586,34 @@ def gradebook():
     if user_record:
         # user authenticated
         user = user_record["username"]
-        question_records = quiz_collection.find({"username": user})  # questions created by user
+        created_questions = {}
+        own_answers = []
 
+        # make created questions dict from database collections
+        question_records = quiz_collection.find({"username": user})  # questions created by user
         if question_records:
-            # get all answers to the quiz questions created by user from answer collection
             for record in question_records:
                 answer_records = ans_collection.find({"questionID": record["_id"]})
+                key = (record["title"], record["description"])
+                val = []
+                if answer_records:
+                    for rec in answer_records:
+                        data = (rec["username"], rec["grade"])
+                        val.append(data)
+                created_questions[key] = val
 
-        # TODO: get all answers answered by user from answer collection
+        # make own_answers from answer collection
+        answer_records = ans_collection.find({"username": user})
+        if answer_records:
+            for record in answer_records:
+                data = (record["qtitle"], record["qdesc"], record["grade"])
+                own_answers.append(data)
 
-        # TODO: make response with html variables replaced
-        pass
+        # make response with html variables replaced
+        response = make_response(render_template('grades.html', user=user, created_questions=created_questions, own_answers=own_answers))
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
+        return response
     else:
         abort(401, "User authentication failed, user not found")
 
