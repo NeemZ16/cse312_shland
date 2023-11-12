@@ -567,6 +567,7 @@ def disconnect():
     send({'name': name, 'message': 'has left the room'})
 
 @app.route('/grades', methods=['GET'])
+@app.route('/grades.html', methods=['GET'])
 def gradebook():
     """
     variables to replace in html file:
