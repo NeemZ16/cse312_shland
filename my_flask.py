@@ -61,6 +61,27 @@ def escape_html(message):
 
     return escaped_message
 
+def grade_answer(questionId, answerId):
+    """
+    grade_answer: updates answer record with grade and outputs int 1 (correct) or 0 (incorrect)
+    questionId: ObjectId corresponding to the record of the question being answered
+    answerId: ObjectId corresponding to the record of the answer being graded
+    """
+
+    q_record = quiz_collection.find_one({"_id": questionId})
+    a_record = ans_collection.find_one({"_id": answerId})
+    grade = 0
+
+    if q_record and a_record:
+        correct = q_record["correct_answer"]
+        user_choice = a_record["user_choice"]
+        if user_choice == correct:
+            grade = 1
+
+        ans_collection.update_one({"_id": answerId}, {"$set": {"grade": grade}})
+
+    return grade
+
 def generate_filename(filename):
     timestamp = str(int(time.time()))
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
@@ -69,7 +90,6 @@ def generate_filename(filename):
     filename, file_extension = os.path.splitext(filename)
     uniqueName = f"{timestamp}_{randomStr}{file_extension}"
     return uniqueName
-
 
 # PATHS (TEMPLATE/IMAGE RENDERING) ------------------------------------
 
