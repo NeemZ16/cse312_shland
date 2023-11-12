@@ -144,20 +144,20 @@ function likePost(likeButton) {
 socketio.on("message", (data) =>{
         addQuestion(data);
 });
-
-function startGame(this) {
-    this.toggleScreen('start-screen', false)
-    this.toggleScreen('canvas', true);
-    this.prepareCanvas();
-    console.log('start game');
-}
-
-function toggleScreen(id, toggle) {
-    const element = document.getElementById(id);
-    const display = (toggle) ? 'block' : 'none';
-    element.style.display = display
-}
-
-function this.prepareCanvas(){
-    alert('hello world');
-}
+// //
+// // function startGame(this) {
+// //     this.toggleScreen('start-screen', false)
+// //     this.toggleScreen('canvas', true);
+// //     this.prepareCanvas();
+// //     console.log('start game');
+// // }
+//
+// function toggleScreen(id, toggle) {
+//     const element = document.getElementById(id);
+//     const display = (toggle) ? 'block' : 'none';
+//     element.style.display = display
+// }
+// //
+// // function this.prepareCanvas(){
+// //     alert('hello world');
+// // }

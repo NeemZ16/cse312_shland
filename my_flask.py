@@ -45,6 +45,7 @@ app.config['UPLOADS'] = UPLOADS
 os.makedirs(app.config['UPLOADS'], exist_ok=True)
 
 print("Checking for 'uploads' directory...")
+
 if os.path.exists('uploads') and os.path.isdir('uploads'):
     print("The 'uploads' directory exists.")
 else:
@@ -525,23 +526,54 @@ def upload_file(filename):
 @app.route('/obj2', methods=['GET', 'POST'])
 def foo():
     if request.method == 'POST':
-        name = request.form.get('name')
-        code = request.form.get('code')
-        join = request.form.get('join', False)
-        create = request.form.get('create', False)
 
-        if not name:
-            return render_template('quizhome.html', error='Please enter a name', code=code, name=name)
+        authCookie = request.headers.get("Cookie")
+
+        if not authCookie or "auth_token" not in authCookie:
+            abort(401, "Only authenticated users can join the lobby")
+
+        authToken = None
+        cookies = {}
+        if authCookie:
+            pairs = authCookie.split(';')
+            for cookie in pairs:
+                key, value = cookie.strip().split("=", 1)
+                cookies[key] = value
+
+        if "auth_token" in cookies:
+            authToken = cookies["auth_token"]
+        else:
+            abort(401, "User authentication failed")
+
+        hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+        user = user_collection.find_one({"auth_token": hashedToken})
+
+        if user:
+            name = user['username']
+            code = request.form.get('code')
+            join = request.form.get('join', False)
+            create = request.form.get('create', False)
+        else:
+            abort(401, "User authentication failed")
+
+        # name = request.form.get('name')
+        # code = request.form.get('code')
+        #
+        # join = request.form.get('join', False)
+        # create = request.form.get('create', False)
+
+        # if not name:
+        #     return render_template('quizhome.html', error='Please enter a name', code=code, name=name)
 
         if join and not code:
             return render_template('quizhome.html', error='Please enter a room code', code=code, name=name)
 
         room = code
-        if create:
+        if create!= False:
             room = generate_unique_code(4)
             rooms[room] = {'creator': name, "members": []}
 
-        elif code not in rooms:
+        elif join != False and code not in rooms:
             return render_template('quizhome.html', error='Quiz does not exist', code=code, name=name)
 
         session['room'] = room

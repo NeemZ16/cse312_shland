@@ -11,16 +11,17 @@
     <body>
         <div class="content"> 
             <form method='post'>
-                <h3>Enter The Quiz Room</h3>
+                <h2>Quiz Lobby</h2>
                 <div>
-                    <label>Name:</label>
-                    <input type="text" placeholder="Pick a quiz name!" name='name' value={{name}}/>
+                    <p>Welcome!</p>
                 </div>
+                <button type="submit" name='create' class='create-btn'>Create a Room</button>
+
                 <div class="join">
-                    <input type="text" placeholder="Room Code" name='code' value={{name}}/>
+                    <label>Room code: </label>
+                    <input type="text" placeholder="Room Code" name='code'/>
                     <button type="submit" name='join' class='join-btn'>Join a Room</button>
                 </div>
-                    <button type="submit" name='create' class='create-btn'>Create a Room</button>
                 {% if error %}
                 <ul>
                     <li>{{error}}</li>
