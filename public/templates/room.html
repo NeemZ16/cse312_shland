@@ -11,6 +11,7 @@
         <script src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <!-- External libraries-->
     </head>
+    <body onload="welcome();">
     <body>
     <div class='members-box'>
         <h2>Quiz Code: {{code}}</h2>
@@ -100,8 +101,9 @@
 </script>
         </body>
     </div>
-    <!-- <canvas id='canvas' style="display:none"></canvas> -->
-    
+    <canvas id='canvas' style="display:none"></canvas>
+    </body>
+
     <script type='text/javascript'>
         var socketio = io();
         const members = document.getElementById('members');

@@ -1,6 +1,6 @@
 import os.path
 
-from flask import Flask, request, render_template, make_response, abort, redirect, send_from_directory, session
+from flask import Flask, request, render_template, make_response, abort, redirect, send_from_directory, session, url_for
 from pymongo import MongoClient
 import json
 import bcrypt
@@ -20,6 +20,8 @@ https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%2
 '''
 
 # DB AND ALLOWED IMAGE SET UP -----------------------------------------
+# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 # mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
 mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
@@ -51,6 +53,7 @@ if os.path.exists('uploads') and os.path.isdir('uploads'):
 else:
     print("The 'uploads' directory does not exist or is not a directory.")
 
+
 # HELPER FUNCS --------------------------------------------------------
 def escape_html(message):
     escaped_message = message.replace("&", "&amp;")
@@ -60,6 +63,7 @@ def escape_html(message):
     escaped_message = escaped_message.replace("<", "&lt;")
 
     return escaped_message
+
 
 def grade_answer(questionId, answerId):
     """
@@ -82,14 +86,16 @@ def grade_answer(questionId, answerId):
 
     return grade
 
+
 def generate_filename(filename):
     timestamp = str(int(time.time()))
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
     capAlpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    randomStr = ''.join(random.choices(alphabet+capAlpha, k=5))
+    randomStr = ''.join(random.choices(alphabet + capAlpha, k=5))
     filename, file_extension = os.path.splitext(filename)
     uniqueName = f"{timestamp}_{randomStr}{file_extension}"
     return uniqueName
+
 
 # PATHS (TEMPLATE/IMAGE RENDERING) ------------------------------------
 
@@ -106,6 +112,7 @@ def generate_unique_code(length):
         if code not in rooms:
             break
     return code
+
 
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
@@ -161,6 +168,7 @@ def style():
 
     return response
 
+
 @app.route('/quiz.css', methods=['GET'])
 def quiz_style():
     response = make_response(render_template('quiz.css'))
@@ -170,6 +178,7 @@ def quiz_style():
 
     return response
 
+
 @app.route('/grades.css', methods=['GET'])
 def grades_style():
     response = make_response(render_template('grades.css'))
@@ -177,6 +186,7 @@ def grades_style():
     response.headers["Content-Type"] = "text/css; charset=utf-8"
 
     return response
+
 
 @app.route('/javascript', methods=['GET'])
 @app.route('/functions.js', methods=['GET'])
@@ -205,6 +215,7 @@ def quiz_javascript():
     # response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
 
     return response
+
 
 @app.route('/static/<image>', methods=['GET'])
 def send_image(image):
@@ -320,7 +331,6 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-
     # print("logging in")
 
     username = request.form.get("username_login")
@@ -448,6 +458,7 @@ def create_post():
 
     return redirect('http://localhost:8080', code=301)
 
+
 @app.route('/get-posts', methods=['GET'])
 def get_posts():
     # print('yooo')
@@ -456,6 +467,7 @@ def get_posts():
         print(post)
         post['_id'] = str(post['_id'])
     return json.dumps(posts), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
+
 
 @app.route('/like-post', methods=['POST'])
 def like_post():
@@ -484,7 +496,7 @@ def like_post():
     if user:
         username = user['username']
         # get post id (from request body) and db.posts.find_one({"_id": postID})
-        body = request.get_json(force=True)         # body is dict
+        body = request.get_json(force=True)  # body is dict
         postID = ObjectId(body['_id'])
         post = db.posts.find_one({"_id": postID})
 
@@ -510,6 +522,7 @@ def like_post():
         abort(401, "User authentication failed")
 
     return redirect('http://localhost:8080', code=301)
+
 
 @app.route('/create-quiz', methods=['POST'])
 def create_quiz():
@@ -610,6 +623,7 @@ def get_userquiz():
 def upload_file(filename):
     return send_from_directory(app.config['UPLOADS'], filename)
 
+
 @app.route('/obj2', methods=['GET', 'POST'])
 def foo():
     if request.method == 'POST':
@@ -643,6 +657,9 @@ def foo():
         else:
             abort(401, "User authentication failed")
 
+        if join == False and create == False:
+            return render_template('quizhome.html', error='Create or enter a room', code=code, name=name)
+
         # name = request.form.get('name')
         code = request.form.get('code')
         join = request.form.get('join', False)
@@ -664,10 +681,35 @@ def foo():
 
         session['room'] = room
         session['name'] = name
+        print("session")
+        print(session)
 
-        return redirect('/room', code=302)
+        # code = session.get("room")
+
+        return redirect(url_for("room"))
+
+        # for dict in rooms:
+        #     print("wtf")
+        #     print(rooms[dict]['members'])
+        #     print(rooms[dict]['creator'])
+        #     owner_name = rooms[dict]["creator"]
+        #     if name == owner_name:
+        #         # return render_template("room.html", code=code, name=name)
+        #         return redirect(url_for("room"))  # , code=code, name=name)
+        #
+        #     if rooms[dict["members"]]:
+        #         if name in rooms[dict["members"]]:
+        #             return redirect(url_for("room"))  # , code=code, name=name)
+
+                # return redirect('/room', code=302)
+
+        return render_template('quizhome.html')
+
+        # else:
+        #     return redirect('/room', code=302)
 
     return render_template('quizhome.html')
+
 
 @app.route('/room')
 def room():
@@ -688,6 +730,7 @@ def room():
 def quiz():
     return render_template('quiz.html')
 
+
 @socketio.on('connect')
 def connect(auth):
     # send("User has connected")
@@ -701,9 +744,10 @@ def connect(auth):
         return
 
     join_room(room)
-    send({'name': name, 'message': 'has entered the room'})
+    send({'name': name, 'message': 'has entered the room'}, to=room)
     rooms[room]['members'].append(name)  # def change to username here, given auth key
     print(str(name) + ' joined room ' + str(room), file=sys.stderr)
+
 
 @socketio.on('disconnect')
 def disconnect():
@@ -716,7 +760,10 @@ def disconnect():
         if len(rooms[room]['members']) <= 0:
             del rooms[room]
 
-    send({'name': name, 'message': 'has left the room'})
+    send({'name': name, 'message': 'has left the room'}, to=room)
+    print(str(name) + ' has left room ' + str(room), file=sys.stderr)
+
+
 
 @app.route('/grades', methods=['GET'])
 @app.route('/grades.html', methods=['GET'])
@@ -765,7 +812,8 @@ def gradebook():
                 own_answers.append(data)
 
         # make response with html variables replaced
-        response = make_response(render_template('grades.html', user=user, created_questions=created_questions, own_answers=own_answers))
+        response = make_response(
+            render_template('grades.html', user=user, created_questions=created_questions, own_answers=own_answers))
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Content-Type"] = "text/html; charset=utf-8"
         return response
