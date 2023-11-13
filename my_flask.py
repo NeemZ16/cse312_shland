@@ -20,8 +20,8 @@ https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%2
 '''
 
 # DB AND ALLOWED IMAGE SET UP -----------------------------------------
-mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
-# mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
+# mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
+mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
 db = mongo_client["cse312"]
 user_collection = db["users"]
 post_collection = db["posts"]
@@ -96,8 +96,8 @@ def generate_filename(filename):
 # CODE FOR WEBSOCKETS -------------------------------
 
 quizQ = {}
-
 rooms = {}
+
 def generate_unique_code(length):
     code = ''
     while True:
@@ -182,6 +182,15 @@ def grades_style():
 @app.route('/functions.js', methods=['GET'])
 def javascript():
     response = make_response(render_template('functions.js'))
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Type"] = "text/javascript; charset=utf-8"
+    # response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
+
+    return response
+
+@app.route('/room.js', methods=['GET'])
+def room_javascript():
+    response = make_response(render_template('room.js'))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/javascript; charset=utf-8"
     # response.headers["Content-Length"] = str(len(bytes(open("public/templates/functions.js").read(), 'utf-8')))
@@ -351,6 +360,45 @@ def login():
     else:
         abort(406, 'missing username or password')
 
+@app.route('/answer-question', methods=['POST'])
+def answer_question():
+    authCookie = request.headers.get("Cookie")
+    if not authCookie or "auth_token" not in authCookie:
+        abort(401, "Only authenticated users can create posts")
+
+    authToken = None
+    cookies = {}
+    if authCookie:
+        pairs = authCookie.split(';')
+        for cookie in pairs:
+            key, value = cookie.strip().split("=", 1)
+            cookies[key] = value
+
+    if "auth_token" in cookies:
+        authToken = cookies["auth_token"]
+    else:
+        abort(401, "User authentication failed")
+
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user = user_collection.find_one({"auth_token": hashedToken})
+
+    # since grabbing username from DB, is it enough to get away with security check?
+    if user:
+        username = user['username']
+    else:
+        abort(401, "User authentication failed")
+    body = request.get_json(force=True)
+    # print('BODYYYYY0-------------------')
+    # print(body)
+    title = body['title']
+    desc = body['description']
+    grade = body['grade']
+    id = body['_id']
+    data = {'username': username, 'qtitle': title, 'qdesc': desc, 'grade': grade, '_id': id}
+    ans_collection.insert_one(data)
+
+    return redirect('/quiz')
+
 
 @app.route('/create-post', methods=['POST'])
 def create_post():
@@ -402,8 +450,10 @@ def create_post():
 
 @app.route('/get-posts', methods=['GET'])
 def get_posts():
+    # print('yooo')
     posts = list(db.posts.find())
     for post in posts:
+        print(post)
         post['_id'] = str(post['_id'])
     return json.dumps(posts), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
 
@@ -509,8 +559,10 @@ def create_quiz():
     db.quiz.insert_one(quizQ)
 
     del quizQ["_id"]
-    return redirect('http://localhost:8080', code=301)
+    # return redirect('http://localhost:8080', code=301)
     # return Response(status=200)
+    return redirect('/room')
+
 
 @app.route('/get-quiz', methods=['GET'])
 def get_quiz():
@@ -518,6 +570,41 @@ def get_quiz():
     for question in questions:
         question['_id'] = str(question['_id'])
     return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
+
+
+@app.route('/get-userquiz', methods=['GET'])
+def get_userquiz():
+    authToken = request.cookies.get("auth_token")
+    if not authToken:
+        abort(401, "User authentication failed, only logged in users can play quizzes")
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user_record = user_collection.find_one({"auth_token": hashedToken})
+
+    if user_record:
+        # user authenticated
+        user = user_record["username"]
+        questions = []
+        question_creator = ''
+
+        # make created questions dict from database collections
+        question_records = quiz_collection.find()  # questions created by user
+
+        for question in question_records: 
+            print(question)
+            question_creator = question['username']
+            postID = ObjectId(question['_id'])
+
+            if question_creator != user:
+                dic = {'question': question['title'], 'answers': question['choices'], 'correct_answer': question['correct_answer'], 'description': question['description'], '_id': str(question['_id'])}
+                questions.append(dic)
+        
+        print('YOOOOOO')
+        print(questions)
+        # make response with html variables replaced
+        return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
+
+    else:
+        abort(401, "User authentication failed, user not found")
 
 @app.route('/uploads/<filename>', methods=['GET'])
 def upload_file(filename):
@@ -557,23 +644,22 @@ def foo():
             abort(401, "User authentication failed")
 
         # name = request.form.get('name')
-        # code = request.form.get('code')
-        #
-        # join = request.form.get('join', False)
-        # create = request.form.get('create', False)
+        code = request.form.get('code')
+        join = request.form.get('join', False)
+        create = request.form.get('create', False)
 
         # if not name:
         #     return render_template('quizhome.html', error='Please enter a name', code=code, name=name)
 
-        if join and not code:
+        if join != False and not code:
             return render_template('quizhome.html', error='Please enter a room code', code=code, name=name)
 
         room = code
-        if create!= False:
+        if create != False:
             room = generate_unique_code(4)
             rooms[room] = {'creator': name, "members": []}
 
-        elif join != False and code not in rooms:
+        elif code not in rooms:
             return render_template('quizhome.html', error='Quiz does not exist', code=code, name=name)
 
         session['room'] = room
@@ -588,8 +674,15 @@ def room():
     room = session.get('room')
     # if room is None or session.get('name') is None or room not in rooms:
     #     return redirect('/obj2')
+    quiz = db.quiz.find()
 
-    return render_template('room.html', code=room)
+    response = make_response(render_template('room.html',code=room, quiz=quiz))
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Type"] = "text/html; charset=utf-8"
+    # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
+
+    return response
+    # return render_template('room.html', code=room, quiz=quiz)
 
 @app.route('/quiz')
 def quiz():
@@ -666,6 +759,8 @@ def gradebook():
         answer_records = ans_collection.find({"username": user})
         if answer_records:
             for record in answer_records:
+                print('answer records')
+                print(record)
                 data = (record["qtitle"], record["qdesc"], record["grade"])
                 own_answers.append(data)
 
@@ -677,12 +772,7 @@ def gradebook():
     else:
         abort(401, "User authentication failed, user not found")
 
-# @socketio.on('message')
-# def message(message):
-
-#     # print("Received message: " + message, file=sys.stderr)
-#     if message != "User connected!":
-#         send(message, broadcast=True)
+    
 
 
 # def handle_join_room_event(data):
