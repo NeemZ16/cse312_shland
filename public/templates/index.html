@@ -4,6 +4,10 @@
     <title>This is our Flask site</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <link rel="icon" type="image/x-icon" href="../static/quiztime.jpg">
+    <!-- External libraries-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- External libraries-->
 </head>
 
 <body class = stretchedToMargin onload="welcome();">
@@ -115,7 +119,7 @@
     <div class="posts">
         <h2>Posts:</h2>
         <div class="listWrapper">
-        <ul id="post-list">
+        <ul id="post-list2">
             <!-- unordered list -->
             <!-- <li>Task 1</li> -->
         </ul>
@@ -123,16 +127,21 @@
     </div>
     <div class="posts">
 
+        <form action="/obj2" method="get">
+            <input type="submit" value="Go to Quiz lobby">
+        </form>
 
-        <div class="messages" id="messages"></div>
-        <input type="text" id="username" placeholder="Username" required>
+        <!--
+        <div class="quizlink" id="quizlink"></div>
+        <button id="sendBtn">
         <input type="text" id="message" placeholder="Message" required>
         <button id="sendBtn">send</button>
+        -->
 
 
-        <h2>Quiz Questions:</h2>
+        <!--<h2>Quiz Questions:</h2>
         <div class="listWrapper">
-        <ul id="quiz-list">
+        <ul id="quiz-list">-->
             <!-- unordered list -->
             <!-- <li>Task 1</li> -->
         </ul>

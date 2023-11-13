@@ -5,9 +5,14 @@
         <meta charset="UTF-8">
         <title>Chat App</title>
         <link rel="stylesheet" href="style.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-        <script src="functions.js"></script>
+        <script src="room.js"></script>
+        <!-- External libraries-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+        <script src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <!-- External libraries-->
     </head>
+    <body onload="welcome();">
+    <body>
     <div class='members-box'>
         <h2>Quiz Code: {{code}}</h2>
         <div class='members' id='members'></div>
@@ -18,7 +23,7 @@
 
 
     <div class='quiz-questions'>
-    <h2>Quiz Questions:</h2>
+        <h2>Quiz Questions:</h2>
         <div class="listWrapper">
         <ul id="quiz-list">
             <!-- unordered list -->
@@ -67,8 +72,37 @@
             <input type="submit" value="Create Question">
         </form>
         <br/>
+        <!-- Websocket Scripts -->
+<script type="text/javascript">
+
+    var socketio = io();
+
+    //const posts = document.getElementById("post-list")
+    //const questions = document.getElementById("quiz-list")
+
+    //const createQuestion = {}
+
+    /*
+    $(document).ready(function(){
+        var socket = io.connect("http://localhost:8080")
+        socket.on('connect', function() {
+            socket.send("User connected!");
+        });
+        socket.on('message', function(data){
+            $('#messages').append($('<p>').text(data));
+        });
+        $('#sendBtn').on('click',function(){
+            socket.send($('#username').val() + ': ' + $('#message').val());
+            $('#message').val('')
+        });
+    });
+     */
+
+</script>
+        </body>
     </div>
     <canvas id='canvas' style="display:none"></canvas>
+    </body>
 
     <script type='text/javascript'>
         var socketio = io();
@@ -87,6 +121,7 @@
 
         // shows joins
         socketio.on('message', (data) => {
+
             showJoin(data.name, data.message)
         });
 

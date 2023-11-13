@@ -11,10 +11,10 @@ function welcome() {
     console.log("yes");
     setInterval(updatePosts, 20000);
     //////////////////////////////////////////////////////////////////////////////////
-    var socket = io.connect("http://localhost:8080");
-    socket.on('connect', function() {
-        console.log("User connected!");
-    });
+    // var socket = io.connect("http://localhost:8080");
+    // socket.on('connect', function() {
+    //     console.log("User connected!");
+    // });
 
 }
 function updatePosts() {
@@ -144,20 +144,3 @@ function likePost(likeButton) {
 socketio.on("message", (data) =>{
         addQuestion(data);
 });
-
-function startGame(this) {
-    this.toggleScreen('start-screen', false)
-    this.toggleScreen('canvas', true);
-    this.prepareCanvas();
-    console.log('start game');
-}
-
-function toggleScreen(id, toggle) {
-    const element = document.getElementById(id);
-    const display = (toggle) ? 'block' : 'none';
-    element.style.display = display
-}
-
-function this.prepareCanvas(){
-    alert('hello world');
-}
