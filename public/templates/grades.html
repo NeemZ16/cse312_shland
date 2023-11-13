@@ -7,29 +7,29 @@
 </head>
 <body>
 <div class="header">
-    <h1>{{ user }}'s Gradebook:</h1>
+    <!--note to self: replace with {{user}}'s gradebook if time allows-->
+    <h1>Gradebook:</h1>
 </div>
 <div class="contents">
     <div class="grade-container">
         <h2>Questions you've created:</h2>
-
-        {% for question in created_questions.keys() %}
+        {%  for user_question in all_questions.keys() %}
         <table class="grades-table">
-            <caption>Question Title: {{ question[0] }}</caption>
-            <caption>Question Description: {{ question[1] }}</caption>
+                <caption>Question Title: {{ user_question[0]}}</caption>
+                <caption>Question Description: {{ user_question[1]}}</caption>
             <tr>
                 <th>User</th>
-                <th>Grade</th>
+                <th>Score</th>
             </tr>
-            {% for answer_data in created_questions[question] %}
+            {% for all_answer in created_question[question] %}
             <tr>
-                {% for cell in answer_data %}
-                <td>{{ cell }}</td>
+                {% for answer in all_answers %}
+                   <td>{{ answer }}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
         </table>
-        <hr>
+            <hr>
         {% endfor %}
 
     </div>
@@ -39,19 +39,22 @@
             <tr>
                 <th>Question Title</th>
                 <th>Description</th>
-                <th>Your Grade</th>
+                <th>Your Score</th>
             </tr>
-
-            {% for answer_data in own_answers %}
             <tr>
-                {% for cell in answer_data %}
-                <td>{{ cell }}</td>
+                {% for row in user_answers  %}
+                    <tr>
+                    {% for cell in row %}
+                        <td>
+                        {{ cell }}
+                        </td>
+                    {% endfor %}
+                    </tr>
                 {% endfor %}
             </tr>
-            {% endfor %}
-
         </table>
     </div>
 </div>
 </body>
+
 </html>
