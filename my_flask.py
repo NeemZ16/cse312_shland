@@ -523,7 +523,7 @@ def create_quiz():
     db.quiz.insert_one(quizQ)
 
     del quizQ["_id"]
-    return redirect('http://localhost:8080', code=301)
+    return redirect(url_for("room"))
     # return Response(status=200)
 
 
@@ -733,13 +733,25 @@ def gradebook():
         abort(401, "User authentication failed, user not found")
 
 
-# @socketio.on('message')
-# def message(message):
+@socketio.on('message')
+def message(data):
 
-#     # print("Received message: " + message, file=sys.stderr)
-#     if message != "User connected!":
-#         send(message, broadcast=True)
+    print("Received message: ")
+    print(data)
+    if data != "User connected!":
+        send(data, broadcast=True)
 
+    room = session.get("room")
+    if room not in rooms:
+        return
+
+    content = {
+        "name": session.get("name"),
+        "message": data
+    }
+    send(content, to=room)
+    print(f"{session.get('name')} created question: {data}")
+    # room
 
 # def handle_join_room_event(data):
 #     print("message_received:" + str(data), file=sys.stderr)
