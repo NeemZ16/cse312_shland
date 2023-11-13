@@ -17,7 +17,10 @@
         <h2>Quiz Code: {{code}}</h2>
         <div class='members' id='members'></div>
         <div class='start-game'>
-            <button class='game-start-btn' onClick='startGame()'>Start Game</button>
+            <form action="/quiz" method="get">
+                <input type="submit" value="Start Game">
+            </form>
+{#            <button class='game-start-btn' onClick='startGame()'>Start Game</button>#}
         </div>
     </div>
 
