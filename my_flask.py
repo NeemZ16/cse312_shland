@@ -118,7 +118,7 @@ def generate_unique_code(length):
 @app.route('/index.html', methods=['GET'])
 def index():
     session.clear()
-    info = ""
+    info = "email verified :)"
     button = ""
     if request.headers.get("Cookie") is not None:
         # print("cookies exist", file=sys.stderr)
@@ -143,8 +143,8 @@ def index():
                 verified = user["verified"]
                 if not verified:
                     info = "Your email is unverified"
-                    button = """<form action="/verify-email" method="get">
-                                    <button class=\"grade-btn\" type=\"submit\">verify email</button>
+                    button = """<form action="/send-verification-email" method="get">
+                                    <button class="grade-btn" type="submit">verify email</button>
                                 </form>"""
             else:
                 username = "Guest"
@@ -284,10 +284,16 @@ def send_cookie():
 
     return response
 
-@app.route('/verify-email')
-def verify_email():
+@app.route('/send-verification-email')
+def send_verification_email():
     # TODO: on click, send email to user's email with link to verify email
     return redirect('http://localhost:8080', code=301)
+
+@app.route('/verify-email/<token>')
+def verify_email():
+    # this should be what the link in the verification email leads to
+    # TODO: match token to verification token in database for user
+    pass
 
 @app.route('/register', methods=['POST'])
 def register():
