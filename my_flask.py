@@ -119,6 +119,7 @@ def generate_unique_code(length):
 def index():
     session.clear()
     info = ""
+    button = ""
     if request.headers.get("Cookie") is not None:
         # print("cookies exist", file=sys.stderr)
         if "auth_token" in request.headers.get("Cookie"):
@@ -140,13 +141,11 @@ def index():
                 username = user["username"]
                 # email = user["email"]
                 verified = user["verified"]
-                if not verified:  # and email:
+                if not verified:
                     info = "Your email is unverified"
-
-                    # TODO: add verify email button html
-                    # below code renders as plain text
-                    # info += "<form action=\"/verify-email\" method=\"get\">"
-                    # info += "<button class=\"grade-btn\" type=\"submit\">verify email</button></form>"
+                    button = """<form action="/verify-email" method="get">
+                                    <button class=\"grade-btn\" type=\"submit\">verify email</button>
+                                </form>"""
             else:
                 username = "Guest"
         else:
@@ -158,7 +157,7 @@ def index():
     posts = db.posts.find()
     quiz = db.quiz.find()
 
-    response = make_response(render_template('index.html', name=username, posts=posts, quiz=quiz, email_info=info))
+    response = make_response(render_template('index.html', name=username, posts=posts, quiz=quiz, email_info=info, verify_button=button))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
@@ -287,8 +286,8 @@ def send_cookie():
 
 @app.route('/verify-email')
 def verify_email():
-    """executed on verify email button"""
-    pass
+    # TODO: on click, send email to user's email with link to verify email
+    return redirect('http://localhost:8080', code=301)
 
 @app.route('/register', methods=['POST'])
 def register():
