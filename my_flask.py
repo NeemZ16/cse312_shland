@@ -118,6 +118,7 @@ def generate_unique_code(length):
 @app.route('/index.html', methods=['GET'])
 def index():
     session.clear()
+    info = ""
     if request.headers.get("Cookie") is not None:
         # print("cookies exist", file=sys.stderr)
         if "auth_token" in request.headers.get("Cookie"):
@@ -137,6 +138,15 @@ def index():
 
             if user:
                 username = user["username"]
+                # email = user["email"]
+                verified = user["verified"]
+                if not verified:  # and email:
+                    info = "Your email is unverified"
+
+                    # TODO: add verify email button html
+                    # below code renders as plain text
+                    # info += "<form action=\"/verify-email\" method=\"get\">"
+                    # info += "<button class=\"grade-btn\" type=\"submit\">verify email</button></form>"
             else:
                 username = "Guest"
         else:
@@ -148,7 +158,7 @@ def index():
     posts = db.posts.find()
     quiz = db.quiz.find()
 
-    response = make_response(render_template('index.html', name=username, posts=posts, quiz=quiz))
+    response = make_response(render_template('index.html', name=username, posts=posts, quiz=quiz, email_info=info))
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     # response.headers["Content-Length"] = str(len(open("public/templates/index.html").read()))
@@ -275,6 +285,10 @@ def send_cookie():
 
     return response
 
+@app.route('/verify-email')
+def verify_email():
+    """executed on verify email button"""
+    pass
 
 @app.route('/register', methods=['POST'])
 def register():
