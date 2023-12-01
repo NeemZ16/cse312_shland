@@ -47,6 +47,10 @@
                 <input id="reg-form-username" type="text" name="username_reg"/>
             </label>
             <br/>
+            <label>Email:&nbsp;
+                <input id="reg-form-email" type="text" name="email_reg">
+            </label>
+            <br/>
             <label>Password:&nbsp;
                 <input id="reg-form-pass" type="password" name="password_reg">
             </label>
@@ -58,8 +62,12 @@
             <label>Username:
                 <input id="login-form-username" type="text" name="username_login"/>
             </label>
+<!--            <br/>-->
+<!--            <label>Email:-->
+<!--                <input id="login-form-email" type="text" name="email_login">-->
+<!--            </label>-->
             <br/>
-            <label>Password:&nbsp;
+            <label>Password:
                 <input id="login-form-pass" type="password" name="password_login">
             </label>
             <input type="submit" value="Post">
@@ -75,45 +83,7 @@
             <br>
             <input type="submit" value="Create Post">
         </form>
-        <br/><!--
-        Create Quiz Question:
-        <form action="/create-quiz" method="post" enctype="multipart/form-data">
-            <label for="quiz-title">Title:</label>
-            <input id="quiz-title" type="text" name="quiz-title" required>
-
-            <div class="question-label">
-                <label for="description">Description:</label>
-                <input id="description" type="text" name="description" required>
-            </div>
-
-            <div class="answer-container">
-                <label for="answer-1">Answer 1:</label>
-                <input type="radio" name="correct_answer" value="1" required>
-                <input id="answer-1" type="text" name="answers[]" required>
-            </div>
-
-            <div class="answer-container">
-                <label for="answer-2">Answer 2:</label>
-                <input type="radio" name="correct_answer" value="2">
-                <input id="answer-2" type="text" name="answers[]" required>
-            </div>
-
-            <div class="answer-container">
-                <label for="answer-3">Answer 3:</label>
-                <input type="radio" name="correct_answer" value="3">
-                <input id="answer-3" type="text" name="answers[]" required>
-            </div>
-
-            <div class="answer-container">
-                <label for="answer-4">Answer 4:</label>
-                <input type="radio" name="correct_answer" value="4">
-                <input id="answer-4" type="text" name="answers[]" required>
-            </div>
-
-            <label for="image-upload">Upload Image:</label>
-            <input type="file" id="image-upload" name="quizImage" accept="image/jpeg, image/png, image/gif">
-            <input type="submit" value="Create Question">
-        </form>-->
+        <br/>
         <br/>
     </div>
     <div class="posts">
@@ -131,23 +101,8 @@
             <input type="submit" value="Go to Quiz lobby">
         </form>
 
-        <!--
-        <div class="quizlink" id="quizlink"></div>
-        <button id="sendBtn">
-        <input type="text" id="message" placeholder="Message" required>
-        <button id="sendBtn">send</button>
-        -->
-
-
-        <!--<h2>Quiz Questions:</h2>
-        <div class="listWrapper">
-        <ul id="quiz-list">-->
-            <!-- unordered list -->
-            <!-- <li>Task 1</li> -->
-        </ul>
         </div>
     </div>
-</div>
 <script src="functions.js"></script>
 
 <!-- External libraries-->
@@ -183,25 +138,5 @@
 
 </script>
 
-
-<!--
-<script>
-    const socket = io.connect("http://127.0/0/1:8080");
-
-    socket.on('connect', function(){
-        socket.emitAll('join_room',{
-            username: "{}",
-            room: "Quiz app"
-        })
-    })
-
-    socket.on('join_room_announcement', function(data){
-        console.log(data);
-        const newNode = document.createElement('div');
-        newNode.innerHTML = `${data.username} has joined the room`;
-        document.getElementById('users').appendChild(newNode)
-    })
-</script>
--->
 </body>
 </html>

@@ -63,26 +63,26 @@ def escape_html(message):
     return escaped_message
 
 
-def grade_answer(questionId, answerId):
-    """
-    grade_answer: updates answer record with grade and outputs int 1 (correct) or 0 (incorrect)
-    questionId: ObjectId corresponding to the record of the question being answered
-    answerId: ObjectId corresponding to the record of the answer being graded
-    """
-
-    q_record = quiz_collection.find_one({"_id": questionId})
-    a_record = ans_collection.find_one({"_id": answerId})
-    grade = 0
-
-    if q_record and a_record:
-        correct = q_record["correct_answer"]
-        user_choice = a_record["user_choice"]
-        if user_choice == correct:
-            grade = 1
-
-        ans_collection.update_one({"_id": answerId}, {"$set": {"grade": grade}})
-
-    return grade
+# def grade_answer(questionId, answerId):
+#     """
+#     grade_answer: updates answer record with grade and outputs int 1 (correct) or 0 (incorrect)
+#     questionId: ObjectId corresponding to the record of the question being answered
+#     answerId: ObjectId corresponding to the record of the answer being graded
+#     """
+#
+#     q_record = quiz_collection.find_one({"_id": questionId})
+#     a_record = ans_collection.find_one({"_id": answerId})
+#     grade = 0
+#
+#     if q_record and a_record:
+#         correct = q_record["correct_answer"]
+#         user_choice = a_record["user_choice"]
+#         if user_choice == correct:
+#             grade = 1
+#
+#         ans_collection.update_one({"_id": answerId}, {"$set": {"grade": grade}})
+#
+#     return grade
 
 
 def generate_filename(filename):
@@ -261,27 +261,10 @@ def send_cookie():
 
         new_cookie = new_cookie.rstrip(new_cookie[-1])
     else:
-        # print("cookie does not exist")
-
-        # cookie_as_list = new_cookie.split(";")
-        # print("cookies as list")
-        # print(cookie_as_list)
-
-        # for lines in cookie_as_list:
-        #     cookie_kvp = lines.split("=")
-        #     # print("lines")
-        #     # print(cookie_kvp)
-        #     cookie_kvps[cookie_kvp[0].strip()] = cookie_kvp[1].strip()
-
-        # print("new cookie kvp's")
-        # print(cookie_kvps)
         new_cookie = "visits=1"
 
         cookie_number = 1
-    # print("new_visit_count")
-    # print(cookie_number)
-    # print("new_cookie")
-    # print(new_cookie)
+
     new_cookie = new_cookie + '; Max-Age=3600; Path=/visit-counter'
 
     response = make_response(str(cookie_number))
@@ -295,33 +278,22 @@ def send_cookie():
 
 @app.route('/register', methods=['POST'])
 def register():
-    # user_collection = db["users"]
-    # print("registering")
-
     username = request.form.get("username_reg")
     password = request.form.get("password_reg")
+    email = request.form.get("email_reg")
 
     username = escape_html(username)
+    email = escape_html(email)
 
     found_user = user_collection.find_one({"username": username})
 
     if found_user is not None:
-        # print("users exist:")
-        # print(found_user)
         abort(401, 'user already exists')
 
-    # print("username")
-    # print(type(username))
-    # print(username)
-    # print("password")
-    # print(password)
-
-    if username and password:
+    if username and password and email:
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        user_and_pass = {"username": username, "password": hashed}
-        # print("user and pass")
-        # print(user_and_pass)
-        user_collection.insert_one(user_and_pass)
+        user_info = {"username": username, "password": hashed, "email": email, "verified": False}
+        user_collection.insert_one(user_info)
 
     # print("made it past database")
     return redirect('http://localhost:8080', code=301)
@@ -329,22 +301,21 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # print("logging in")
-
     username = request.form.get("username_login")
     password = request.form.get("password_login")
+    # email = request.form.get("email_login")
 
     username = escape_html(username)
+    # email = escape_html(email)
 
     checking_cookie = request.headers.get("Cookie")
     if "Cookie" in request.headers and "auth_token" in checking_cookie:
         abort(401, 'Already logged in as a user')
 
-    if username and password:
+    if username and password:  # and email:
         db_pass = user_collection.find_one({"username": username})  # finds a specific user
 
         if db_pass:  # if that user exists
-
             hash_pass = db_pass["password"]  # grab what's stored as their password
             if bcrypt.checkpw(password.encode("utf-8"), hash_pass):  # if the passwords match
                 auth_token = secrets.token_urlsafe(32)
