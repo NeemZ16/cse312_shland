@@ -112,6 +112,18 @@ def generate_unique_code(length):
             break
     return code
 
+@app.route('/get_headers', methods=['GET'])
+def get_headers():
+    # Get all headers received in the request
+    all_headers = request.headers
+
+    # Print all headers received
+    for header, value in all_headers.items():
+        print(f"Header: {header}, Value: {value}")
+
+    return "Check the console for printed headers"
+
+'''
 #before request allows this function to run before anything else 
 all_ips = {}
 
@@ -137,9 +149,11 @@ def block_requests():
                 abort(429, "Blocked due too many requests, wait to access")
         else: # add new ip to dict
             all_ips[ip] = {'blocked': False, "count":1, 'time': None}
+            return redirect('/') # allowed to enter homepage
     else: #REMOVE AFTER TESTING
-        abort(429, "Testing purpose x-real-ip not in header")
+        abort(404, "Testing purpose x-real-ip not in header")
 
+'''
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
