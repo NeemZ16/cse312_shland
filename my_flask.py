@@ -123,37 +123,6 @@ def get_headers():
 
     return "Check the console for printed headers"
 
-'''
-#before request allows this function to run before anything else 
-all_ips = {}
-
-@app.before_request 
-def block_requests():
-    if request.headers.get("x-real-ip") is not None:
-        ip =  request.headers.get("x-real-ip").strip()
-        if ip in all_ips:
-            ip_info = all_ips[ip] #will include whether ip is blocked, block time, and count
-            ip_info['count'] += 1 #incrementing request count 
-            if ip_info['blocked']: # if blocked == true
-                time = ip_info['time'] # get the block time
-                if datetime.now() > time + timedelta(seconds=30): # if the time now is past the time ip was blocked + 30 seconds, ip is unblocked
-                    ip_info['blocked'] = False
-                    ip_info['time'] = None 
-                    ip_info['count'] = 0
-                    return redirect('/') # allowed to enter homepage
-                else: #if ip is still blocked 
-                    abort(429, "Too many requests, wait to access")
-            if ip_info['count'] > 50: #not blocked but too many requests
-                ip_info['blocked'] = True
-                ip_info['time']= datetime.now()
-                abort(429, "Blocked due too many requests, wait to access")
-        else: # add new ip to dict
-            all_ips[ip] = {'blocked': False, "count":1, 'time': None}
-            return redirect('/') # allowed to enter homepage
-    else: #REMOVE AFTER TESTING
-        abort(404, "Testing purpose x-real-ip not in header")
-
-'''
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
