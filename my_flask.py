@@ -19,6 +19,10 @@ https://testdriven.io/tips/e3ecc90d-0612-4d48-bf51-2323e913e17b/#:~:text=Flask%2
 
 '''
 
+# switch for deployment
+# redirect_to = "https://shland.me"
+redirect_to = "http://localhost:8080"
+
 # DB AND ALLOWED IMAGE SET UP -----------------------------------------
 mongo_client = MongoClient("mongodb://mongo:27017")  # Docker testing
 # mongo_client = MongoClient("mongodb://localhost:27017")  # local testing
@@ -284,16 +288,36 @@ def send_cookie():
 
     return response
 
-@app.route('/send-verification-email')
+@app.route('/send-verification-email', methods=['GET'])
 def send_verification_email():
     # TODO: on click, send email to user's email with link to verify email
-    return redirect('http://localhost:8080', code=301)
+    return redirect(redirect_to, code=301)
 
-@app.route('/verify-email/<token>')
-def verify_email():
-    # this should be what the link in the verification email leads to
-    # TODO: match token to verification token in database for user
-    pass
+@app.route('/verify-email/<token>', methods=['POST'])
+def verify_email(token):
+    """match token to verification token in database for user
+    [this should be what the link in the verification email leads to]"""
+
+    # authenticate user
+    authToken = request.cookies.get("auth_token")
+    if not authToken:
+        abort(401, "User authentication failed, only logged in users can verify emails")
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user_record = user_collection.find_one({"auth_token": hashedToken})
+
+    if user_record:
+        # user authenticated, get email verification token from db
+        ver_token = user_record["email_token"]
+        verified = not user_record["verified"]
+
+        # update verified in db
+        if ver_token == token:
+            user_collection.update_one({"email_token": token}, {"$set": {"verified": verified}})
+            return redirect(redirect_to, code=301)
+        else:
+            abort(401, "Verification token does not match")
+    else:
+        abort(401, "User authentication failed, user not found")
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -315,7 +339,7 @@ def register():
         user_collection.insert_one(user_info)
 
     # print("made it past database")
-    return redirect('http://localhost:8080', code=301)
+    return redirect(redirect_to, code=301)
 
 
 @app.route('/login', methods=['POST'])
@@ -444,12 +468,11 @@ def create_post():
     # objectID = cursor['_id']
     # print(str(objectID))
 
-    return redirect('http://localhost:8080', code=301)
+    return redirect(redirect_to, code=301)
 
 
 @app.route('/get-posts', methods=['GET'])
 def get_posts():
-    # print('yooo')
     posts = list(db.posts.find())
     for post in posts:
         print(post)
@@ -509,7 +532,7 @@ def like_post():
     else:
         abort(401, "User authentication failed")
 
-    return redirect('http://localhost:8080', code=301)
+    return redirect(redirect_to, code=301)
 
 
 @app.route('/create-quiz', methods=['POST'])
@@ -752,7 +775,6 @@ def disconnect():
     print(str(name) + ' has left room ' + str(room), file=sys.stderr)
 
 
-
 @app.route('/grades', methods=['GET'])
 @app.route('/grades.html', methods=['GET'])
 def gradebook():
@@ -808,14 +830,6 @@ def gradebook():
     else:
         abort(401, "User authentication failed, user not found")
 
-    
-
-
-# def handle_join_room_event(data):
-#     print("message_received:" + str(data), file=sys.stderr)
-#     app.logger.info("{} has joined the Quiz app".format(data['username']))
-#     join_room("Quiz app")
-#     socketio.emit('join_room_announcement', data)
 
 if __name__ == "__main__":
     # Please do not set debug=True in production
