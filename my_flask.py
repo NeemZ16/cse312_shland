@@ -112,17 +112,6 @@ def generate_unique_code(length):
             break
     return code
 
-@app.route('/get_headers', methods=['GET'])
-def get_headers():
-    # Get all headers received in the request
-    all_headers = request.headers
-
-    # Print all headers received
-    for header, value in all_headers.items():
-        print(f"Header: {header}, Value: {value}")
-
-    return "Check the console for printed headers"
-
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
@@ -186,6 +175,16 @@ def style():
 
     return response
 
+@app.route('/get_headers', methods=['GET'])
+def get_headers():
+    # Get all headers received in the request
+    all_headers = request.headers
+
+    # Print all headers received
+    for header, value in all_headers.items():
+        print(f"Header: {header}, Value: {value}")
+
+    return "Check the console for printed headers"
 
 @app.route('/quiz.css', methods=['GET'])
 def quiz_style():
