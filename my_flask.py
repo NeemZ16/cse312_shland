@@ -98,6 +98,18 @@ def generate_filename(filename):
     uniqueName = f"{timestamp}_{randomStr}{file_extension}"
     return uniqueName
 
+def generate_verification_link(username):
+    """
+    generates verification link hardcoded for shland.me
+    adds verification token to user db given username
+    :return: link for verification email message body as string
+    """
+    link = "https://shland.me/verify-email/"
+    email_token = secrets.token_urlsafe(32)
+    link += email_token
+
+    user_collection.update_one({"username": username}, {"$set": {"email_token": email_token}})
+    return link
 
 # PATHS (TEMPLATE/IMAGE RENDERING) ------------------------------------
 
@@ -122,7 +134,7 @@ def generate_unique_code(length):
 @app.route('/index.html', methods=['GET'])
 def index():
     session.clear()
-    info = "email verified :)"
+    info = ""
     button = ""
     if request.headers.get("Cookie") is not None:
         # print("cookies exist", file=sys.stderr)
@@ -150,6 +162,8 @@ def index():
                     button = """<form action="/send-verification-email" method="get">
                                     <button class="grade-btn" type="submit">verify email</button>
                                 </form>"""
+                else:
+                    info = "email verified :)"
             else:
                 username = "Guest"
         else:
@@ -291,6 +305,17 @@ def send_cookie():
 @app.route('/send-verification-email', methods=['GET'])
 def send_verification_email():
     # TODO: on click, send email to user's email with link to verify email
+    # note: user can only access this button if logged in
+
+    authToken = request.cookies.get("auth_token")
+    if not authToken:
+        abort(401, "User authentication failed, only logged in users can see grades")
+    hashedToken = hashlib.sha256(authToken.encode("utf-8")).hexdigest()
+    user_record = user_collection.find_one({"auth_token": hashedToken})
+    username = user_record["username"]
+
+    message_body = generate_verification_link(username)
+
     return redirect(redirect_to, code=301)
 
 @app.route('/verify-email/<token>', methods=['POST'])
