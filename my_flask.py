@@ -112,7 +112,6 @@ def generate_unique_code(length):
             break
     return code
 
-'''
 #before request allows this function to run before anything else 
 all_ips = {}
 
@@ -138,10 +137,7 @@ def block_requests():
                 abort(429, "Blocked due too many requests, wait to access")
         else: # add new ip to dict
             all_ips[ip] = {'blocked': False, "count":1, 'time': None}
-    else: #REMOVE AFTER TESTING
-        abort(429, "Testing purpose x-real-ip not in header")
-
-'''
+  
 # route() func tells Flask what URL should trigger the function
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
