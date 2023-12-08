@@ -10,11 +10,7 @@ function welcome() {
     updateQuizQuestions();
     console.log("yes");
     setInterval(updatePosts, 20000);
-    //////////////////////////////////////////////////////////////////////////////////
-    // var socket = io.connect("http://localhost:8080");
-    // socket.on('connect', function() {
-    //     console.log("User connected!");
-    // });
+
 
 }
 function updatePosts() {

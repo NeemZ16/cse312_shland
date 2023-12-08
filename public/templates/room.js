@@ -9,7 +9,7 @@ function welcome() {
 
     updateQuizQuestions();
     console.log("yes");
-    setInterval(updateQuizQuestions, 20000);
+    // setInterval(updateQuizQuestions, 20000);
     //////////////////////////////////////////////////////////////////////////////////
     var socket = io.connect("http://localhost:8080/room");
     socket.on('connect', function() {

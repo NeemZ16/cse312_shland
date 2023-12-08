@@ -558,6 +558,9 @@ def create_quiz():
         image.save(image_path)
 
     answer = int(escape_html(request.form.get('correct_answer')))
+    room_code = request.form.get('room-code')
+    # print("room code", file=sys.stderr)
+    # print(room_code, file=sys.stderr)
 
     quizQ = {
         'title': title,
@@ -565,7 +568,8 @@ def create_quiz():
         'choices': choices,
         'image': image_name,
         'correct_answer': answer,
-        'username': username
+        'username': username,
+        'quiz_room': room_code
     }
     db.quiz.insert_one(quizQ)
 
@@ -575,9 +579,9 @@ def create_quiz():
     return redirect('/room')
 
 
-@app.route('/get-quiz', methods=['GET'])
+@app.route('/get-quiz', methods=['GET', 'POST'])
 def get_quiz():
-    questions = list(db.quiz.find())
+    questions = list(db.quiz.find({"quiz_room": room}))
     for question in questions:
         question['_id'] = str(question['_id'])
     return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
@@ -606,11 +610,17 @@ def get_userquiz():
             postID = ObjectId(question['_id'])
 
             if question_creator != user:
-                dic = {'question': question['title'], 'answers': question['choices'], 'correct_answer': question['correct_answer'], 'description': question['description'], '_id': str(question['_id'])}
+                # add the room code
+                dic = {'question': question['title'],
+                       'answers': question['choices'],
+                       'correct_answer': question['correct_answer'],
+                       'description': question['description'],
+                       '_id': str(question['_id']
+                        )}
                 questions.append(dic)
         
-        print('YOOOOOO')
-        print(questions)
+        # print('YOOOOOO')
+        # print(questions)
         # make response with html variables replaced
         return json.dumps(questions), 200, {'Content-Type': 'application/json', "X-Content-Type-Options": "nosniff"}
 
@@ -684,6 +694,8 @@ def foo():
 
         # code = session.get("room")
 
+        user_collection.update_one({"auth_token": hashedToken}, {"$set": {"current_room": room}})
+
         return redirect(url_for("room"))
 
         # for dict in rooms:
@@ -714,7 +726,7 @@ def room():
     room = session.get('room')
     # if room is None or session.get('name') is None or room not in rooms:
     #     return redirect('/obj2')
-    quiz = db.quiz.find()
+    quiz = db.quiz.find({"quiz_room": room})
 
     response = make_response(render_template('room.html',code=room, quiz=quiz))
     response.headers["X-Content-Type-Options"] = "nosniff"

@@ -12,7 +12,7 @@
         <!-- External libraries-->
     </head>
     <body onload="welcome();">
-    <body>
+
     <div class='members-box'>
         <h2>Quiz Code: {{code}}</h2>
         <div class='members' id='members'></div>
@@ -72,37 +72,13 @@
 
             <label for="image-upload">Upload Image:</label>
             <input type="file" id="image-upload" name="quizImage" accept="image/jpeg, image/png, image/gif">
+            <input type="hidden" name="room-code" id="room-code" value = {{code}}>
+
             <input type="submit" value="Create Question">
         </form>
         <br/>
         <!-- Websocket Scripts -->
-<script type="text/javascript">
 
-    var socketio = io();
-
-    //const posts = document.getElementById("post-list")
-    //const questions = document.getElementById("quiz-list")
-
-    //const createQuestion = {}
-
-    /*
-    $(document).ready(function(){
-        var socket = io.connect("http://localhost:8080")
-        socket.on('connect', function() {
-            socket.send("User connected!");
-        });
-        socket.on('message', function(data){
-            $('#messages').append($('<p>').text(data));
-        });
-        $('#sendBtn').on('click',function(){
-            socket.send($('#username').val() + ': ' + $('#message').val());
-            $('#message').val('')
-        });
-    });
-     */
-
-</script>
-        </body>
     </div>
     <canvas id='canvas' style="display:none"></canvas>
     </body>
@@ -128,8 +104,6 @@
             showJoin(data.name, data.message)
         });
 
-        // const joinGame = () => {
-        //     console.log('new member joined');
-        // };
+
     </script>
 </html>
