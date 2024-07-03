@@ -2,7 +2,7 @@ This is a project for our class CSE 312 at the University at Buffalo,
 taught by Prof. Jesse Hartloff: cse312.com
 
 Our project can be found and deployed at 
-https://shland.me 
+https://shland.me [Currently Inactive]
 
 Authors:
 
